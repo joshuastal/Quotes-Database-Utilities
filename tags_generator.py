@@ -222,6 +222,11 @@ def print_differences(list1: list[TagSchema], list2: list[TagSchema]):
             print(f"Index {i}: {tag_values1} != {tag_values2}")
 
 
+def print_tag_schema(tag_schema: list[TagSchema]):
+    for index, tags in enumerate(tag_schema):
+        print(f"{index}: {[tag.value for tag in tags.tags]}")
+
+
 def main():
     client = initialize_model()
 
@@ -235,10 +240,13 @@ def main():
     else:
         print("Tag schemas are different")
 
-    # print("\n".join(f"{index}: {tags}" for index, tags in enumerate(tag_schema1)))
-    # print("\n".join(f"{index}: {tags}" for index, tags in enumerate(tag_schema2)))
-
     print_differences(tag_schema1, tag_schema2)
+
+    print("Tag Schema 1: ")
+    print_tag_schema(tag_schema1)
+    print()
+    print("Tag Schema 2: ")
+    print_tag_schema(tag_schema2)
 
 
 if __name__ == "__main__":
