@@ -3,8 +3,9 @@ import argparse
 from google.cloud import firestore
 from google.oauth2 import service_account
 
+
 CREDENTIALS = service_account.Credentials.from_service_account_file(
-    "/Users/joshua/Coding Stuff/Quotes App Utilities/test-6aa80-firebase-adminsdk-troo8-435926642e.json"
+    "Quotes_App_Utilities/test-6aa80-firebase-adminsdk-troo8-435926642e.json"
 )
 
 COLLECTION_NAME = "Quotes"

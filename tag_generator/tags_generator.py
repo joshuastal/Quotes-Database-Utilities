@@ -10,7 +10,7 @@ from ..progress_bar import ProgressBar
 from .tag_data import TagSchema
 
 load_dotenv()
-
+print("Environment Variables Loaded...\n")
 AI_MODEL = "gpt-5.6-luna"
 API_KEY = os.getenv("GPT_API_KEY")
 QUOTES: list[str] = json.loads(os.getenv("QUOTES", "[]"))
@@ -24,6 +24,7 @@ def initialize_model() -> OpenAI:
     elif not client:
         raise ValueError("Client not initialized")
 
+    print("Model Initialized...\n")
     return client
 
 
@@ -34,32 +35,32 @@ def generate_tags(
 
     for index, quote in enumerate(quotes, 1):
         prompt = f"""
-        Select between one and three unique tags that would help someone find this
-        quote while browsing by practical topic.
+            Select between one and three unique tags that would help someone find this
+            quote while browsing by practical topic.
 
-        A tag is supported when the quote:
-        1. directly discusses the topic,
-        2. warns against the opposite vice or behavior, or
-        3. clearly teaches the corresponding virtue or practical response.
+            A tag is supported when the quote:
+            1. directly discusses the topic,
+            2. warns against the opposite vice or behavior, or
+            3. clearly teaches the corresponding virtue or practical response.
 
-        When more than three tags apply, prioritize:
-        1. the central subject,
-        2. the behavior or virtue being taught,
-        3. the principal struggle or consequence.
+            When more than three tags apply, prioritize:
+            1. the central subject,
+            2. the behavior or virtue being taught,
+            3. the principal struggle or consequence.
 
-        Apply these distinctions:
-        - self_control applies to warnings against excess or indulgence.
-        - temptation applies when demonic influence or enticement toward sin is central.
-        - hope applies when the quote teaches resistance to despair.
-        - integrity applies when someone remains truthful despite pressure or consequences.
-        - courage applies only when confronting fear or danger is itself a central subject.
-        - Prefer integrity over courage when the central lesson is refusing to lie.
+            Apply these distinctions:
+            - self_control applies to warnings against excess or indulgence.
+            - temptation applies when demonic influence or enticement toward sin is central.
+            - hope applies when the quote teaches resistance to despair.
+            - integrity applies when someone remains truthful despite pressure or consequences.
+            - courage applies only when confronting fear or danger is itself a central subject.
+            - Prefer integrity over courage when the central lesson is refusing to lie.
 
-        Do not add merely associated religious concepts.
+            Do not add merely associated religious concepts.
 
-        Identify unique 3 tags based off of this quote:
+            Identify unique 3 tags based off of this quote:
 
-        {quote}
+            {quote}
         """
 
         tag_response = client.responses.parse(
@@ -78,32 +79,6 @@ def generate_tags(
         progress_bar.increment()
 
     return tags
-
-
-def test_model_time(client: OpenAI):
-    total_time = 0
-
-    print("Starting Test")
-    print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-
-    for _ in range(5):
-        start_time = time.time()
-
-        text_response = client.responses.create(
-            model=AI_MODEL,
-            input="Tell me a joke about Python programming",
-            reasoning={"effort": "medium"},
-            max_output_tokens=50,
-        )
-
-        end_time = time.time()
-
-        total_time += end_time - start_time
-
-        print(f"Response: {text_response.output_text}\n")
-
-    print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-    print(f"Average time: {total_time / 5:.2f} seconds")
 
 
 def print_differences(list1: list[TagSchema], list2: list[TagSchema]):

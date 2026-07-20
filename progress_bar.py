@@ -32,7 +32,13 @@ class ProgressBar:
         )
         filled_length = int(self._get_length() * self.progress // self.total)
         bar = self.fill * filled_length + "-" * (self._get_length() - filled_length)
-        print("\r", self._get_progress_bar_to_print(bar, percent), end="")
+        print(
+            "\r",
+            self._get_progress_bar_to_print(bar, percent),
+            end="",
+            flush=True,
+        )
+
         # Print New Line on Complete
         if self.progress == self.total:
             print()
@@ -54,15 +60,16 @@ class ProgressBar:
             self.progress = min(self.progress + amount, self.total)
             self._print_progress_bar()
 
+
 # Locks have been added for multithreading safety
 # Without the lock, two threads could read the same progress value and cause one increment to be lost.
 # With this, one thread will acquire the lock before the other, increment, and release it
 # The other one will wait till the lock is available before finishing its current task.
 # All of this is handled automatically through with self._lock:
-# 
+#
 # Keeping the lock inside ProgressBar encapsulates its thread-safety and prevents
 # callers from having to manage synchronization themselves.
-# 
+#
 # update_progress() and increment() use the same lock because multiple threads
 # may share and modify this ProgressBar instance.
 #
@@ -76,4 +83,3 @@ class ProgressBar:
 #
 # Keeping the lock inside ProgressBar encapsulates its synchronization and
 # prevents callers from having to acquire the lock themselves.
-
