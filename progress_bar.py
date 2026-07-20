@@ -53,3 +53,27 @@ class ProgressBar:
         with self._lock:
             self.progress = min(self.progress + amount, self.total)
             self._print_progress_bar()
+
+# Locks have been added for multithreading safety
+# Without the lock, two threads could read the same progress value and cause one increment to be lost.
+# With this, one thread will acquire the lock before the other, increment, and release it
+# The other one will wait till the lock is available before finishing its current task.
+# All of this is handled automatically through with self._lock:
+# 
+# Keeping the lock inside ProgressBar encapsulates its thread-safety and prevents
+# callers from having to manage synchronization themselves.
+# 
+# update_progress() and increment() use the same lock because multiple threads
+# may share and modify this ProgressBar instance.
+#
+# Incrementing progress is a read-modify-write operation. Without the lock, two
+# threads could read the same progress value and cause one increment to be lost.
+# Their terminal output could also overlap.
+#
+# Only one thread can hold the lock at a time. If another thread reaches one of
+# these methods while the lock is held, it waits until the lock is released.
+# The with statement automatically releases the lock when the block exits.
+#
+# Keeping the lock inside ProgressBar encapsulates its synchronization and
+# prevents callers from having to acquire the lock themselves.
+
