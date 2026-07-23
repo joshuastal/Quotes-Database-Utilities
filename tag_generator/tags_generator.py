@@ -34,7 +34,7 @@ def generate_tags(
 ) -> list[TagSchema]:
     tags: list[TagSchema] = []
 
-    for index, quote in enumerate(quotes, 1):
+    for quote in enumerate(quotes, 1):
         prompt = f"""
             Select between one and three unique tags that would help someone find this
             quote while browsing by practical topic.
@@ -117,7 +117,7 @@ def main():
     RUNS = 2
 
     progress_bar = ProgressBar(len(QUOTES) * RUNS, prefix="Classifying Quotes ")
-    progress_bar.update_progress(0)
+    progress_bar.update_progress(0)  # pyright: ignore
 
     # use ThreadPoolExecutor as context manager
     # When block finishes, it waits for the submitted tasks
