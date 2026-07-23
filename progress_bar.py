@@ -35,6 +35,7 @@ class ProgressBar:
         print(
             "\r",
             self._get_progress_bar_to_print(bar, percent),
+            sep ="",
             end="",
             flush=True,
         )

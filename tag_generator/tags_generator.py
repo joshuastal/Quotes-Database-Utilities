@@ -6,8 +6,9 @@ from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from ..progress_bar import ProgressBar
-from .tag_data import TagSchema
+from output_colors import DiffColors
+from progress_bar import ProgressBar
+from tag_data import TagSchema
 
 load_dotenv()
 print("Environment Variables Loaded...\n")
@@ -20,16 +21,16 @@ def initialize_model() -> OpenAI:
     client = OpenAI(api_key=API_KEY)
 
     if client.api_key == "":
-        raise ValueError("API key is not set")
+        raise ValueError(DiffColors.FAIL + "API key is not set")
     elif not client:
-        raise ValueError("Client not initialized")
+        raise ValueError(DiffColors.FAIL + "Client not initialized")
 
-    print("Model Initialized...\n")
+    print(DiffColors.GREEN + "Model Initialized...\n" + DiffColors.ENDC)
     return client
 
 
 def generate_tags(
-    client: OpenAI, quotes: list[str], progress_bar: ProgressBar
+        client: OpenAI, quotes: list[str], progress_bar: ProgressBar
 ) -> list[TagSchema]:
     tags: list[TagSchema] = []
 
@@ -82,12 +83,25 @@ def generate_tags(
 
 
 def print_differences(list1: list[TagSchema], list2: list[TagSchema]):
+    def format_tag(tag: str) -> str:
+        if tag in different_tags:
+            return DiffColors.FAIL + tag + DiffColors.ENDC
+        return tag
+
     for i, (tag1, tag2) in enumerate(zip(list1, list2)):
         tag_values1 = sorted(tag.value for tag in tag1.tags)
         tag_values2 = sorted(tag.value for tag in tag2.tags)
 
-        if tag_values1 != tag_values2:
-            print(f"Index {i + 1}: {tag_values1} != {tag_values2}")
+        # set(list1) ^ set(list2) calculates the symmetric differences between 2 sets
+        different_tags = set(tag_values1) ^ set(tag_values2)
+
+        tag1_diffs = [format_tag(tag) for tag in tag_values1]
+        tag2_diffs = [format_tag(tag) for tag in tag_values2]
+
+        if not different_tags:
+            continue
+
+        print(f"Index {i}: [{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}]")
 
 
 def print_tag_schema(tag_schema: list[TagSchema]):
@@ -103,7 +117,6 @@ def main():
     RUNS = 2
 
     progress_bar = ProgressBar(len(QUOTES) * RUNS, prefix="Classifying Quotes ")
-
     progress_bar.update_progress(0)
 
     # use ThreadPoolExecutor as context manager
@@ -178,14 +191,20 @@ def main():
     print_tag_schema(tag_schema2)
     print()
 
-    if tag_schema1 == tag_schema2:
-        print("Tag schemas are identical")
+    if all(  # all(...) returns True when every value inside it is True
+            # each schema is a list of tags
+            # check each tag in each sorted list and compare the item in the
+            # same index in the other list
+            sorted(tag.value for tag in schema1.tags)
+            == sorted(tag.value for tag in schema2.tags)
+            for schema1, schema2 in zip(tag_schema1, tag_schema2, strict=True)
+    ):
+        print(DiffColors.GREEN + "Tag schemas are identical" + DiffColors.ENDC)
     else:
-        print("Tag schemas are different")
+        print(DiffColors.FAIL + "Tag schemas are different" + DiffColors.ENDC)
+        print_differences(tag_schema1, tag_schema2)
 
-    print_differences(tag_schema1, tag_schema2)
-
-    print(f"\nTime taken: {end - start} seconds")
+    print(f"\nTime taken: {end - start:.0f} seconds")
 
 
 if __name__ == "__main__":
