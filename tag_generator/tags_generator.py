@@ -5,10 +5,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
 from openai import OpenAI
-
 from output_colors import DiffColors
-from progress_bar import ProgressBar
 from tag_data import TagSchema
+
+from progress_bar import ProgressBar
 
 load_dotenv()
 print("Environment Variables Loaded...\n")
@@ -30,7 +30,7 @@ def initialize_model() -> OpenAI:
 
 
 def generate_tags(
-        client: OpenAI, quotes: list[str], progress_bar: ProgressBar
+    client: OpenAI, quotes: list[str], progress_bar: ProgressBar
 ) -> list[TagSchema]:
     tags: list[TagSchema] = []
 
@@ -83,7 +83,7 @@ def generate_tags(
 
 
 def generate_tags_multithreaded(
-        client: OpenAI, quotes: list[str], progress_bar: ProgressBar, runs: int
+    client: OpenAI, quotes: list[str], progress_bar: ProgressBar, runs: int
 ) -> list[list[TagSchema]]:
     # use ThreadPoolExecutor as context manager
     # When block finishes, it waits for the submitted tasks
@@ -186,7 +186,9 @@ def main():
     progress_bar = ProgressBar(len(QUOTES) * runs, prefix="Classifying Quotes ")
     progress_bar.update_progress(0)  # pyright: ignore
 
-    tag_schema1, tag_schema2 = generate_tags_multithreaded(client, QUOTES, progress_bar, runs)
+    tag_schema1, tag_schema2 = generate_tags_multithreaded(
+        client, QUOTES, progress_bar, runs
+    )
 
     end = time.time()
 
@@ -199,12 +201,12 @@ def main():
     print()
 
     if all(  # all(...) returns True when every value inside it is True
-            # each schema is a list of tags
-            # check each tag in each sorted list and compare the item in the
-            # same index in the other list
-            sorted(tag.value for tag in schema1.tags)
-            == sorted(tag.value for tag in schema2.tags)
-            for schema1, schema2 in zip(tag_schema1, tag_schema2, strict=True)
+        # each schema is a list of tags
+        # check each tag in each sorted list and compare the item in the
+        # same index in the other list
+        sorted(tag.value for tag in schema1.tags)
+        == sorted(tag.value for tag in schema2.tags)
+        for schema1, schema2 in zip(tag_schema1, tag_schema2, strict=True)
     ):
         print(DiffColors.GREEN + "Tag schemas are identical" + DiffColors.ENDC)
     else:
