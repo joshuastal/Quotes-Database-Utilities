@@ -3,7 +3,14 @@ import threading
 
 
 class ProgressBar:
-    def __init__(self, total, prefix="", suffix="", decimals=1, fill="█"):
+    def __init__(
+        self,
+        total: int,
+        prefix: str = "",
+        suffix: str = "",
+        decimals: int = 1,
+        fill: str = "█",
+    ) -> None:
         self.total = total
         self.progress = 0
         self.prefix = prefix
@@ -13,20 +20,20 @@ class ProgressBar:
         self._lock = threading.Lock()
         self._total_length = self._get_terminal_size()
 
-    def _get_terminal_size(self):
+    def _get_terminal_size(self) -> int:
         try:
             return os.get_terminal_size().columns
-        except Exception:
+        except OSError:
             return 100
 
-    def _get_progress_bar_to_print(self, bar, percent):
+    def _get_progress_bar_to_print(self, bar: str, percent: str) -> str:
         return f"{self.prefix}({self.progress} / {self.total}) |{bar}| {percent}% {self.suffix}"
 
-    def _get_length(self):
+    def _get_length(self) -> int:
         len_to_print = len(self._get_progress_bar_to_print("", "")) + 4 + self.decimals
         return self._get_terminal_size() - len_to_print - 1
 
-    def _print_progress_bar(self):
+    def _print_progress_bar(self) -> None:
         percent = ("{0:." + str(self.decimals) + "f}").format(
             100 * (self.progress / float(self.total))
         )
@@ -35,7 +42,7 @@ class ProgressBar:
         print(
             "\r",
             self._get_progress_bar_to_print(bar, percent),
-            sep ="",
+            sep="",
             end="",
             flush=True,
         )
@@ -44,14 +51,14 @@ class ProgressBar:
         if self.progress == self.total:
             print()
 
-    def print(self, *args):
+    def print(self, *args: object) -> None:
         args_len = 0
         for a in [*args]:
             args_len += len(str(a)) + 1
         print("\r", *args, " " * (self._total_length - args_len - 1))
         self._print_progress_bar()
 
-    def update_progress(self, progress):
+    def update_progress(self, progress: int) -> None:
         with self._lock:
             self.progress = progress
             self._print_progress_bar()
