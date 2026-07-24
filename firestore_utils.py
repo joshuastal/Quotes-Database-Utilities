@@ -1,24 +1,16 @@
+import argparse
 import pickle
 
 from google.cloud import firestore
+from google.cloud.firestore_v1.document import DocumentReference
 from google.oauth2 import service_account
+
+from Quote import Quote
 
 QUOTES_FILE = "quotes.pk"
 
 
-class Quote:
-    author: str
-    quote: str
-    tags: list[str]
-
-    def __init__(self, Author: str, Quote: str, tags: list[str] | None = None):
-        self.author = Author
-        self.quote = Quote
-        self.tags = tags if tags is not None else []
-
-
 class FirestoreClient:
-
     def __init__(self):
         self.client = firestore.Client(
             project=service_account.Credentials.from_service_account_file(  # pyright: ignore
@@ -29,14 +21,13 @@ class FirestoreClient:
             ),
         )
 
-        try:  # ping firestore
-            self.client.collection("Quotes").limit(1).get(  # pyright: ignore
-                timeout=5,
-                retry=None,
-            )
-        except Exception as e:
-            raise e
+        # ping firestore
+        self.client.collection("Quotes").limit(1).get(  # pyright: ignore
+            timeout=5,
+            retry=None,
+        )
 
+        self.query_firestore = False
         self._documents: list[Quote] = []
         self._document_references: list[str] = []
 
@@ -61,15 +52,46 @@ class FirestoreClient:
         if len(self._documents) != len(self._document_references):
             raise ValueError("Mismatch between documents and document references")
 
-        with open(QUOTES_FILE, 'wb') as f:
+        with open(QUOTES_FILE, "wb") as f:
             pickle.dump((self._documents, self._document_references), f)
 
     def load_collection(self) -> tuple[list[Quote], list[str]]:
-        self.fetch_collection()
+        if self.query_firestore:
+            print("Fetching collection from Firestore...")
+            self.fetch_collection()
+        else:
+            print("Loading quotes from file without Firestore...\n")
 
-        with open(QUOTES_FILE, 'rb') as f:
+        with open(QUOTES_FILE, "rb") as f:
             self._documents, self._document_references = pickle.load(f)
         return self._documents, self._document_references
+
+    def write_batch(
+        self, doc_refs: list[DocumentReference], data_to_write: dict[str, object]
+    ):
+        updated_count = 0
+        BATCH_SIZE = 500
+
+        # range(start, stop, step)
+        # begin at 0, stop before the total document count
+        # increase start by BATCH_SIZE after each iteration of outer loop
+        for start in range(0, len(doc_refs), BATCH_SIZE):
+            batch = self.client.batch()
+
+            # Get the next documents after the previous 500
+            # start = 0      → [0:500]
+            # start = 500    → [500:1000]
+            # start = 1000   → [1000:1500]
+            batch_references = doc_refs[start : start + BATCH_SIZE]
+
+            for reference in batch_references:
+                batch.update(reference, data_to_write)
+
+            batch.commit()  # pyright: ignore
+            updated_count += len(batch_references)
+            print(f"Updated {updated_count} documents so far.")
+
+        print("Finished")
 
     def summarize_collection(self):
         for quote in self._documents:
@@ -78,7 +100,8 @@ class FirestoreClient:
             Author: {quote.author}
             Quote: {quote.quote}
             Tags: {quote.tags}
-            """)
+            """
+            )
 
         print(self._document_references[0:10])
 
@@ -86,10 +109,23 @@ class FirestoreClient:
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--apply", action="store_true", help="Actually update Firestore."
+    )
+
+    args = parser.parse_args()
+
     try:
         db = FirestoreClient()
     except Exception as e:
+        print("Unable to connect to Firestore...")
         raise e
+
+    print("Should Firestore be queried?\n1: Yes\n2: No")
+    choice = input("> ")
+    if choice == "2":
+        db.query_firestore = False
 
     collection, references = db.load_collection()
 
@@ -97,6 +133,15 @@ def main():
     # for some reason
     collection_references = [db.client.document(path) for path in references]
     db.summarize_collection()
+
+    print("Write quotes to databse? \n1: Yes\n2: No")
+    choice = input("> ")
+    if choice == "2":
+        return
+
+    if not args.apply:
+        print("Dry run only. Run again with --apply to update Firestore.")
+        return
 
 
 if __name__ == "__main__":
