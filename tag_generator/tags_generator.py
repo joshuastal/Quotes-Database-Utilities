@@ -82,43 +82,9 @@ def generate_tags(
     return tags
 
 
-def print_differences(list1: list[TagSchema], list2: list[TagSchema]):
-    def format_tag(tag: str) -> str:
-        if tag in different_tags:
-            return DiffColors.FAIL + tag + DiffColors.ENDC
-        return tag
-
-    for i, (tag1, tag2) in enumerate(zip(list1, list2)):
-        tag_values1 = sorted(tag.value for tag in tag1.tags)
-        tag_values2 = sorted(tag.value for tag in tag2.tags)
-
-        # set(list1) ^ set(list2) calculates the symmetric differences between 2 sets
-        different_tags = set(tag_values1) ^ set(tag_values2)
-
-        tag1_diffs = [format_tag(tag) for tag in tag_values1]
-        tag2_diffs = [format_tag(tag) for tag in tag_values2]
-
-        if not different_tags:
-            continue
-
-        print(f"Index {i}: [{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}]")
-
-
-def print_tag_schema(tag_schema: list[TagSchema]):
-    for index, tags in enumerate(tag_schema):
-        print(f"{index}: {[tag.value for tag in tags.tags]}")
-
-
-def main():
-    client = initialize_model()
-
-    start = time.time()
-
-    RUNS = 2
-
-    progress_bar = ProgressBar(len(QUOTES) * RUNS, prefix="Classifying Quotes ")
-    progress_bar.update_progress(0)  # pyright: ignore
-
+def generate_tags_multithreaded(
+        client: OpenAI, quotes: list[str], progress_bar: ProgressBar, runs: int
+) -> list[list[TagSchema]]:
     # use ThreadPoolExecutor as context manager
     # When block finishes, it waits for the submitted tasks
     # and shuts down the pool
@@ -176,11 +142,52 @@ def main():
 
         results = list(
             executor.map(
-                generate_tags, [client] * RUNS, [QUOTES] * RUNS, [progress_bar] * RUNS
+                generate_tags, [client] * runs, [quotes] * runs, [progress_bar] * runs
             )
         )
 
-    tag_schema1, tag_schema2 = results
+    return results
+
+
+def print_differences(list1: list[TagSchema], list2: list[TagSchema]):
+    def format_tag(tag: str) -> str:
+        if tag in different_tags:
+            return DiffColors.FAIL + tag + DiffColors.ENDC
+        return tag
+
+    for i, (tag1, tag2) in enumerate(zip(list1, list2)):
+        tag_values1 = sorted(tag.value for tag in tag1.tags)
+        tag_values2 = sorted(tag.value for tag in tag2.tags)
+
+        # set(list1) ^ set(list2) calculates the symmetric differences between 2 sets
+        different_tags = set(tag_values1) ^ set(tag_values2)
+
+        tag1_diffs = [format_tag(tag) for tag in tag_values1]
+        tag2_diffs = [format_tag(tag) for tag in tag_values2]
+
+        if not different_tags:
+            continue
+
+        print(f"Index {i}: [{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}]")
+
+
+def print_tag_schema(tag_schema: list[TagSchema]):
+    for index, tags in enumerate(tag_schema):
+        print(f"{index}: {[tag.value for tag in tags.tags]}")
+
+
+def main():
+    client = initialize_model()
+
+    start = time.time()
+
+    runs = 2
+
+    progress_bar = ProgressBar(len(QUOTES) * runs, prefix="Classifying Quotes ")
+    progress_bar.update_progress(0)  # pyright: ignore
+
+    tag_schema1, tag_schema2 = generate_tags_multithreaded(client, QUOTES, progress_bar, runs)
+
     end = time.time()
 
     print("\nTag Schema 1:")
