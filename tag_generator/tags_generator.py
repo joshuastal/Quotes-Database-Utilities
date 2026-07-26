@@ -7,10 +7,10 @@ from threading import Event
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from output_colors import DiffColors
 from progress_bar import ProgressBar
 from Quote import Quote
-from tag_data import TagSchema
+from .output_colors import DiffColors
+from .tag_data import TagSchema
 
 load_dotenv()
 print("Environment Variables Loaded...\n")
@@ -39,18 +39,15 @@ class TagGenerator:
     def _generate_tags(
             self,
             client: OpenAI,
-            quotes: list[Quote],
+            quote: Quote,
             progress_bar: ProgressBar,
             stop_event: Event,
-    ) -> list[TagSchema]:
-        tags: list[TagSchema] = []
+    ) -> TagSchema:
+        if stop_event.is_set():
+            raise RuntimeError("Tag generation was stopped")
 
-        for quote in quotes:
-            if stop_event.is_set():
-                return tags
-
-            try:
-                prompt = f"""
+        try:
+            prompt = f"""
                     Select between one and three unique tags that would help someone find this
                     quote while browsing by practical topic.
 
@@ -79,51 +76,68 @@ class TagGenerator:
                     {quote.quote}
                 """
 
-                tag_response = client.responses.parse(
-                    model=AI_MODEL,
-                    instructions=(
-                        "You are a content classification specialist. "
-                        "You specialize in classifying and tagging content."
-                    ),
-                    input=prompt,
-                    reasoning={"effort": "low"},
-                    max_output_tokens=500,
-                    text_format=TagSchema,
+            tag_response = client.responses.parse(
+                model=AI_MODEL,
+                instructions=(
+                    "You are a content classification specialist. "
+                    "You specialize in classifying and tagging content."
+                ),
+                input=prompt,
+                reasoning={"effort": "low"},
+                max_output_tokens=500,
+                text_format=TagSchema,
+            )
+
+            parsed_tags = tag_response.output_parsed
+
+            if parsed_tags is None:
+                print("Invalid schema generated for quote:", quote.quote)
+                raise RuntimeError(
+                    f"No parsed tags for quote: {quote.quote!r}; "
+                    f"status={tag_response.status!r}; "
+                    f"incomplete_details={tag_response.incomplete_details!r}; "
+                    f"output={tag_response.output!r}"
                 )
 
-                parsed_tags = tag_response.output_parsed
+            progress_bar.increment()
+            return parsed_tags  # pyright: ignore
 
-                if parsed_tags is None:
-                    print("Invalid schema generated for quote:", quote.quote)
-                    raise RuntimeError(
-                        f"No parsed tags for quote: {quote.quote!r}; "
-                        f"status={tag_response.status!r}; "
-                        f"incomplete_details={tag_response.incomplete_details!r}; "
-                        f"output={tag_response.output!r}"
-                    )
-
-                tags.append(parsed_tags)  # pyright: ignore
-                progress_bar.increment()
-
-            except Exception:
-                stop_event.set()
-                raise
-
-        return tags
+        except Exception:
+            stop_event.set()
+            raise
 
     def generate_tags_multithreaded(
             self, client: OpenAI, quotes: list[Quote], runs: int
     ) -> list[list[TagSchema]]:
 
-        progress_bar = ProgressBar(len(quotes) * runs, prefix="Classifying Quotes ")
+        if runs < 1:
+            raise ValueError("runs must be at least 1")
+
+        # if 3 quotes with 2 runs, 6 tasks need to be run since this does each quote as its own task now
+        total_tasks = len(quotes) * runs
+        if total_tasks == 0:
+            raise ValueError("No quotes to classify")
+
+        progress_bar = ProgressBar(total_tasks, prefix="Classifying Quotes ")
         progress_bar.update_progress(0)  # pyright: ignore
 
         stop_event = Event()
 
+        # With two runs:
+        # [quote 1, quote 2, ..., quote 600,
+        #  quote 1, quote 2, ..., quote 600]
+        # adds runs copies of each quote to the list
+        work_quotes = [
+            quote
+            for _ in range(runs)
+            for quote in quotes
+        ]
+
         # use ThreadPoolExecutor as context manager
         # When block finishes, it waits for the submitted tasks
         # and shuts down the pool
-        with ThreadPoolExecutor() as executor:
+        # min(...) -> use whichever is smaller
+        with ThreadPoolExecutor(max_workers=min(8, total_tasks)) as executor:
             """
             executor.map calls generate_tags() once for each pair of arguments
             it's call structure looks like this:
@@ -173,19 +187,40 @@ class TagGenerator:
             Without list(...), results refers directly to that iterator.
             With list(...), results is a list, and code after the list(...) call
             runs only after all mapped results have been collected successfully.
+            
+            .map(...) also returns input results in the order of which they were created
             """
 
-            results = list(
+            flat_results = list(
                 executor.map(
                     self._generate_tags,
-                    [client] * runs,
-                    [quotes] * runs,
-                    [progress_bar] * runs,
-                    [stop_event] * runs,
+                    [client] * total_tasks,
+                    work_quotes,
+                    [progress_bar] * total_tasks,
+                    [stop_event] * total_tasks,
                 )
             )
+        quote_count = len(quotes)
 
-        return results
+        # Turn the flat list back into one list per run.
+        # list[TagSchema] = result for one run
+        # list[list[TagSchema]] = result for all runs
+        results_by_run: list[list[TagSchema]] = []
+
+        # Put 1 list with the first quote_count tag schemas into the first index
+        # The next index will contain the next quote_count tag schemas and so on and so forth
+        # results_by_run[0] will contain the results from the first run over the whole list
+        # results_by_run[1] will contain the results from the second run over the whole list
+        # ...
+        for run_index in range(runs):
+            start = run_index * quote_count
+            stop = (run_index + 1) * quote_count
+
+            # results_by_run contains lists, so we append lists to it as its objects
+            one_run = flat_results[start:stop]
+            results_by_run.append(one_run)
+
+        return results_by_run
 
     def print_differences(self, list1: list[TagSchema], list2: list[TagSchema]):
         total_differences = 0

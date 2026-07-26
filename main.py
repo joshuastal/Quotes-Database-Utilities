@@ -55,7 +55,7 @@ def main():
 
     print(f"Time taken: {end_time - start_time:.0f} seconds")
 
-    print("Keep tag schema? (y/n): ", end="")
+    print("Keep tag schema? (y/N): ", end="")
     if input().lower() == "y":
         print("Which schema? (1/2): ", end="")
         schema_num = int(input())
@@ -67,9 +67,8 @@ def main():
         print("Dry run only. Run again with --apply to update Firestore.")
         return
 
-    print("Write quotes to databse? \n1: Yes\n2: No")
-    choice = input("> ")
-    if choice == "2":
+    print("Write quotes to firestore (PERMANENT—NO UNDO)? (y/N)")
+    if input("> ").lower() == "n":
         return
     else:
         return
