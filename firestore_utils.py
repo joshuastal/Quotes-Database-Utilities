@@ -67,7 +67,7 @@ class FirestoreClient:
         return self._documents, self._document_references
 
     def write_batch(
-        self, doc_refs: list[DocumentReference], data_to_write: dict[str, object]
+            self, doc_refs: list[DocumentReference], data_to_write: dict[str, object]
     ):
         updated_count = 0
         BATCH_SIZE = 500
@@ -82,7 +82,7 @@ class FirestoreClient:
             # start = 0      → [0:500]
             # start = 500    → [500:1000]
             # start = 1000   → [1000:1500]
-            batch_references = doc_refs[start : start + BATCH_SIZE]
+            batch_references = doc_refs[start: start + BATCH_SIZE]
 
             for reference in batch_references:
                 batch.update(reference, data_to_write)

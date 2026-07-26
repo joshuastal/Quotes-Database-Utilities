@@ -7,11 +7,10 @@ from threading import Event
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from output_colors import DiffColors
 from progress_bar import ProgressBar
 from Quote import Quote
-
-from .output_colors import DiffColors
-from .tag_data import TagSchema
+from tag_data import TagSchema
 
 load_dotenv()
 print("Environment Variables Loaded...\n")
@@ -38,11 +37,11 @@ class TagGenerator:
         return client
 
     def _generate_tags(
-        self,
-        client: OpenAI,
-        quotes: list[Quote],
-        progress_bar: ProgressBar,
-        stop_event: Event,
+            self,
+            client: OpenAI,
+            quotes: list[Quote],
+            progress_bar: ProgressBar,
+            stop_event: Event,
     ) -> list[TagSchema]:
         tags: list[TagSchema] = []
 
@@ -113,7 +112,7 @@ class TagGenerator:
         return tags
 
     def generate_tags_multithreaded(
-        self, client: OpenAI, quotes: list[Quote], runs: int
+            self, client: OpenAI, quotes: list[Quote], runs: int
     ) -> list[list[TagSchema]]:
 
         progress_bar = ProgressBar(len(quotes) * runs, prefix="Classifying Quotes ")
@@ -189,10 +188,14 @@ class TagGenerator:
         return results
 
     def print_differences(self, list1: list[TagSchema], list2: list[TagSchema]):
+        total_differences = 0
+
         def format_tag(tag: str) -> str:
             if tag in different_tags:
                 return DiffColors.FAIL + tag + DiffColors.ENDC
             return tag
+
+        different_tags: set[str] = set()
 
         for i, (tag1, tag2) in enumerate(zip(list1, list2)):
             tag_values1 = sorted(tag.value for tag in tag1.tags)
@@ -208,6 +211,8 @@ class TagGenerator:
                 continue
 
             print(f"Index {i}: [{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}]")
+            total_differences += 1
+        print(f"\nTotal differences: {total_differences}")
 
     def print_tag_schema(self, tag_schema: list[TagSchema]):
         for index, tags in enumerate(tag_schema):
@@ -234,12 +239,12 @@ def main():
     print()
 
     if all(  # all(...) returns True when every value inside it is True
-        # each schema is a list of tags
-        # check each tag in each sorted list and compare the item in the
-        # same index in the other list
-        sorted(tag.value for tag in schema1.tags)
-        == sorted(tag.value for tag in schema2.tags)
-        for schema1, schema2 in zip(tag_schema1, tag_schema2, strict=True)
+            # each schema is a list of tags
+            # check each tag in each sorted list and compare the item in the
+            # same index in the other list
+            sorted(tag.value for tag in schema1.tags)
+            == sorted(tag.value for tag in schema2.tags)
+            for schema1, schema2 in zip(tag_schema1, tag_schema2, strict=True)
     ):
         print(DiffColors.GREEN + "Tag schemas are identical" + DiffColors.ENDC)
     else:
