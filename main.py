@@ -1,6 +1,12 @@
 import argparse
+import json
 import os
 import pickle
+
+from dotenv import load_dotenv
+
+from Quote import Quote
+from tag_generator.tag_data import TagSchema
 
 os.environ.setdefault("GRPC_VERBOSITY", "ERROR")
 import time
@@ -10,6 +16,23 @@ from tag_generator import tags_generator as tgs_gen
 from tag_generator.output_colors import DiffColors
 
 TAG_SCHEMA_FILE = "tag_schema.pk"
+load_dotenv()
+TEST_QUOTES: list[Quote] = [
+    Quote(Author="", Quote=quote) for quote in json.loads(os.getenv("QUOTES", "[]"))
+]
+
+
+def check_quotes(collection: list[Quote], tag_schema1: list[TagSchema], tag_schema2: list[TagSchema]):
+    flag = True
+    while flag:
+        print("Would you like to check a quote? (y/N): ", end="")
+        if input().lower() == "y":
+            print("Enter quote index: ", end="")
+            index = int(input())
+            print(f"{collection[index].quote}\n")
+            tgs_gen.TagGenerator().print_differences_by_index(tag_schema1[index], tag_schema2[index])
+        else:
+            flag = False
 
 
 def main():
@@ -34,7 +57,7 @@ def main():
     start_time = time.time()
 
     tg = tgs_gen.TagGenerator()
-    tag_schema1, tag_schema2 = tg.generate_tags_multithreaded(tg.client, collection, 2)
+    tag_schema1, tag_schema2 = tg.generate_tags_multithreaded(tg.client, collection, 2, 8)
 
     end_time = time.time()
 
@@ -50,10 +73,15 @@ def main():
     ):
         print(DiffColors.GREEN + "Tag schemas are identical" + DiffColors.ENDC)
     else:
-        print(DiffColors.FAIL + "Tag schemas are different" + DiffColors.ENDC)
+        print("\n" + DiffColors.FAIL + "Tag schemas are different" + DiffColors.ENDC)
         tg.print_differences(tag_schema1, tag_schema2)
 
-    print(f"Time taken: {end_time - start_time:.0f} seconds")
+    elapsed_seconds = round(end_time - start_time)
+    minutes, seconds = divmod(elapsed_seconds, 60)
+
+    print(f"\nTime taken: {minutes} minutes, {seconds} seconds\n")
+
+    check_quotes(collection, tag_schema1, tag_schema2)
 
     print("Keep tag schema? (y/N): ", end="")
     if input().lower() == "y":

@@ -17,7 +17,7 @@ class Tag(str, Enum):
     VIRTUES = "virtues"
     COMPASSION = "compassion"
     WISDOM = "wisdom"
-    REPENTEANCE = "repentance"
+    REPENTANCE = "repentance"
     LOVE = "love"
     SERVICE = "service"
     MERCY = "mercy"

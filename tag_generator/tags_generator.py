@@ -107,7 +107,7 @@ class TagGenerator:
             raise
 
     def generate_tags_multithreaded(
-            self, client: OpenAI, quotes: list[Quote], runs: int
+            self, client: OpenAI, quotes: list[Quote], runs: int, max_workers: int = 8
     ) -> list[list[TagSchema]]:
 
         if runs < 1:
@@ -137,7 +137,7 @@ class TagGenerator:
         # When block finishes, it waits for the submitted tasks
         # and shuts down the pool
         # min(...) -> use whichever is smaller
-        with ThreadPoolExecutor(max_workers=min(8, total_tasks)) as executor:
+        with ThreadPoolExecutor(max_workers=min(max_workers, total_tasks)) as executor:
             """
             executor.map calls generate_tags() once for each pair of arguments
             it's call structure looks like this:
@@ -223,7 +223,7 @@ class TagGenerator:
         return results_by_run
 
     def print_differences(self, list1: list[TagSchema], list2: list[TagSchema]):
-        total_differences = 0
+        total_diff_schemas = 0
 
         def format_tag(tag: str) -> str:
             if tag in different_tags:
@@ -245,9 +245,31 @@ class TagGenerator:
             if not different_tags:
                 continue
 
-            print(f"Index {i}: [{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}]")
-            total_differences += 1
-        print(f"\nTotal differences: {total_differences}")
+            print(
+                f"Index {i}: [{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}] | {len(different_tags)} different tags")
+            total_diff_schemas += 1
+        print(f"\nTotal different schemas: {total_diff_schemas}")
+
+    def print_differences_by_index(self, tag_schema1: TagSchema, tag_schema2: TagSchema):
+        def format_tag(tag: str) -> str:
+            if tag in different_tags:
+                return DiffColors.FAIL + tag + DiffColors.ENDC
+            return tag
+
+        different_tags: set[str] = set()
+
+        tag_values1 = sorted(tag.value for tag in tag_schema1.tags)
+        tag_values2 = sorted(tag.value for tag in tag_schema2.tags)
+
+        different_tags = set(tag_values1) ^ set(tag_values2)
+
+        tag1_diffs = [format_tag(tag) for tag in tag_values1]
+        tag2_diffs = [format_tag(tag) for tag in tag_values2]
+
+        if not different_tags:
+            return
+
+        print(f"[{', '.join(tag1_diffs)}] != [{', '.join(tag2_diffs)}] | {len(different_tags)} different tags")
 
     def print_tag_schema(self, tag_schema: list[TagSchema]):
         for index, tags in enumerate(tag_schema):
