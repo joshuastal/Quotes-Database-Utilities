@@ -99,7 +99,10 @@ def main():
     if input("> ").lower() == "n":
         return
     else:
-        return
+        print("Writing to Firestore...")
+        with open(TAG_SCHEMA_FILE, "rb") as f:
+            tag_schema = pickle.load(f)
+        db.write_tags_to_collection(collection_references, tag_schema)
 
 
 if __name__ == "__main__":

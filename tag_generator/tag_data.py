@@ -97,6 +97,9 @@ class Tag(str, Enum):
     INJUSTICE = "injustice"
     BURNOUT = "burnout"
 
+    # Personally added tags
+    SCRIPTURE = "scripture"
+
 
 class TagSchema(BaseModel):
     tags: list[Tag] = Field(min_length=1, max_length=3)

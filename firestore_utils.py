@@ -6,6 +6,7 @@ from google.cloud.firestore_v1.document import DocumentReference
 from google.oauth2 import service_account
 
 from Quote import Quote
+from tag_generator.tag_data import TagSchema
 
 QUOTES_FILE = "quotes.pk"
 
@@ -85,6 +86,38 @@ class FirestoreClient:
             batch_references = doc_refs[start: start + BATCH_SIZE]
 
             for reference in batch_references:
+                batch.update(reference, data_to_write)
+
+            batch.commit()  # pyright: ignore
+            updated_count += len(batch_references)
+            print(f"Updated {updated_count} documents so far.")
+
+        print("Finished")
+
+    def write_tags_to_collection(
+            self, doc_refs: list[DocumentReference], tag_schema: list[TagSchema]
+    ):
+        if len(doc_refs) != len(tag_schema):
+            raise ValueError("Document and schema counts do not match")
+
+        updated_count = 0
+        BATCH_SIZE = 500
+
+        # range(start, stop, step)
+        # begin at 0, stop before the total document count
+        # increase start by BATCH_SIZE after each iteration of outer loop
+        for start in range(0, len(doc_refs), BATCH_SIZE):
+            batch = self.client.batch()
+            # Get the next documents after the previous 500
+            # start = 0      → [0:500]
+            # start = 500    → [500:1000]
+            # start = 1000   → [1000:1500]
+            batch_references = doc_refs[start: start + BATCH_SIZE]
+
+            for index, reference in enumerate(batch_references, start=start):
+                data_to_write = {
+                    "tags": [tag.value for tag in tag_schema[index].tags]
+                }
                 batch.update(reference, data_to_write)
 
             batch.commit()  # pyright: ignore
