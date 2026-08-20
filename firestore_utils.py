@@ -160,11 +160,11 @@ def main():
     if choice == "2":
         db.query_firestore = False
 
-    collection, references = db.load_collection()
+    collection, references = db.load_collection()  # pyright: ignore
 
     # get actual document references for firestore operations because they cannot be stored in the .pk file
     # for some reason
-    collection_references = [db.client.document(path) for path in references]
+    collection_references = [db.client.document(path) for path in references]  # pyright: ignore
     db.summarize_collection()
 
     print("Write quotes to databse? \n1: Yes\n2: No")
