@@ -2,3 +2,6 @@
 test-6aa80-firebase-adminsdk-troo8-435926642e.json
 .idea
 quotes.pk
+__pycache__/
+__pycache__/firestore_utils.cpython-313.pyc
+tag_generator/__pycache__/tag_data.cpython-313.pyc
