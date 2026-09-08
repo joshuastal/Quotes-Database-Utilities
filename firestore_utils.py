@@ -40,11 +40,14 @@ class FirestoreClient:
             if data is None:
                 raise ValueError("Document data is None")
 
-            # Quote(**data) takes a dictionary and passes the key-value pairs to the Quote constructor as named arguments
-            # Author: value
-            # Quote: value
-            # tags: value
-            self._documents.append(Quote(**data))  # pyright: ignore
+            self._documents.append(
+                Quote(
+                    author=data["Author"],
+                    quote=data["Quote"],
+                    tags=data["tags"],
+                    created_at=str(document.create_time),  # pyright: ignore
+                    updated_at=str(document.update_time),  # pyright: ignore
+                ))
             self._document_references.append(document.reference.path)  # pyright: ignore
 
         if len(self._documents) == 0 or len(self._document_references) == 0:
@@ -126,7 +129,7 @@ class FirestoreClient:
 
         print("Finished")
 
-    def summarize_collection(self):
+    def collection_to_string(self):
         for quote in self._documents:
             print(
                 f"""
@@ -139,6 +142,14 @@ class FirestoreClient:
         print(self._document_references[0:10])
 
         print(f"\nFound {len(self._documents)} quotes.")
+
+    def get_all_tags(self, quotes: list[Quote]) -> set[str]:
+        all_tags: set[str] = set()
+
+        for quote in quotes:
+            all_tags.update(quote.tags)
+
+        return all_tags
 
 
 def main():
@@ -157,7 +168,9 @@ def main():
 
     print("Should Firestore be queried?\n1: Yes\n2: No")
     choice = input("> ")
-    if choice == "2":
+    if choice == "1":
+        db.query_firestore = True
+    else:
         db.query_firestore = False
 
     collection, references = db.load_collection()  # pyright: ignore
@@ -165,12 +178,11 @@ def main():
     # get actual document references for firestore operations because they cannot be stored in the .pk file
     # for some reason
     collection_references = [db.client.document(path) for path in references]  # pyright: ignore
-    db.summarize_collection()
+    db.collection_to_string()
 
-    print("Write quotes to databse? \n1: Yes\n2: No")
-    choice = input("> ")
-    if choice == "2":
-        return
+    tags = db.get_all_tags(collection)
+    for tag in tags:
+        print(tag)
 
     if not args.apply:
         print("Dry run only. Run again with --apply to update Firestore.")

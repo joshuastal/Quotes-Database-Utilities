@@ -1,5 +1,7 @@
 import pickle
 
+import jsonpickle
+
 from Quote import Quote
 
 QUOTES_FILE = "quotes.pk"
@@ -22,12 +24,26 @@ def find_longest_quotes(quotes: list[Quote], limit: int) -> list[Quote]:
     return sorted(quotes, key=lambda quote: len(quote.quote), reverse=True)[:limit]
 
 
+def export_quotes():
+    with open(QUOTES_FILE, "rb") as f:
+        quotes, _ = pickle.load(f)
+
+    with open("quotes.json", "w", encoding="utf-8") as f:
+        f.write(jsonpickle.encode(quotes))  # pyright: ignore
+
+
 def main():
     print(f"Longest Quote: {find_longest_quote(quotes).quote}\n")
     print(f"Longest 10 Quotes:")
     for quote in find_longest_quotes(quotes, 10):
         print(f"{quote.quote}\n")
     print(f"Shortest Quote: {find_shortest_quote(quotes).quote}\n")
+
+    export_choice = input("Export quotes to JSON? (y/N): \n> ")
+    if export_choice.lower() == "y":
+        export_quotes()
+    else:
+        return
 
 
 if __name__ == "__main__":
