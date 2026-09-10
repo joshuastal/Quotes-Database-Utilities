@@ -7,8 +7,8 @@ from threading import Event
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from progress_bar import ProgressBar
-from Quote import Quote
+from data.legacy.progress_bar import ProgressBar
+from data.legacy.Quote import Quote
 from .output_colors import DiffColors
 from .tag_data import TagSchema
 
