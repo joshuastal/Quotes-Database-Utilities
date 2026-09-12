@@ -1,7 +1,7 @@
 import {fetchQuotes} from './firestore-service.js';
 import {findDuplicates} from './duplicate-finder.js';
 import difflib from 'difflib';
-
+import {writeFile} from 'node:fs/promises';
 
 export async function getDuplicates(quotes) {
     return findDuplicates(quotes);
@@ -58,11 +58,26 @@ export function findQuotesByField(quotes, field, value) {
     });
 }
 
+export function deleteQuote(quote) {
+    // TODO
+}
+
+export function addQuote(quote) {
+    // TODO
+}
+
+export async function sendQuotesToJSON(quotes) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `./quotes_${timestamp}.json`;
+    const fileURL = new URL(fileName, import.meta.url);
+    const json = JSON.stringify(quotes, null, 2);
+    await writeFile(fileURL, json, 'utf8');
+}
+
 try {
     const quotes = await getQuotes();
-    const filtered = findQuotesByField(quotes, 'tags', 'godness');
-    console.log(filtered);
 
+    await sendQuotesToJSON(quotes);
 } catch (error) {
     console.error(error);
 }
