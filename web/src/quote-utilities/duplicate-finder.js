@@ -1,5 +1,4 @@
 import difflib from 'difflib';
-import quotesFromFile from './quotes.json' with {type: 'json'};
 
 export function findDuplicates(quotes) {
     const threshold = 0.85;
@@ -32,12 +31,3 @@ export function findDuplicates(quotes) {
     console.log(duplicates.length);
     return duplicates;
 }
-
-function readQuotesFile() {
-    return quotesFromFile;
-}
-
-
-const duplicates = findDuplicates(quotesFromFile);
-console.log(duplicates);
-//console.log(readQuotesFile());

@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "difflib": "^0.2.4",
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "firebase": "^12.19.0"
   }
 }
