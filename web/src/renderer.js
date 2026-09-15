@@ -1,33 +1,58 @@
-/**
- * This file will automatically be loaded by webpack and run in the "renderer" context.
- * To learn more about the differences between the "main" and the "renderer" context in
- * Electron, visit:
- *
- * https://electronjs.org/docs/tutorial/process-model
- *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.js` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
- */
-
 import './index.css';
+import {Quote} from "./quote-utilities/quote.js";
+import {addQuote, getQuotes} from "./quote-utilities/quote-service.js";
 
-console.log(
-  '👋 This message is being logged by "renderer.js", included via webpack',
-);
+
+const quoteForm = document.getElementById('quote-form');
+const quoteToAdd = document.getElementById('quote-to-add');
+quoteForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const author = document.getElementById('author').value;
+    const quoteText = document.getElementById('quote').value;
+    const tags = document.getElementById('tags').value;
+
+    const quote = new Quote(author, quoteText, tags);
+
+    addQuote(quote);
+
+    quoteToAdd.textContent = `Quote submitted: ${author} ${quoteText} ${tags}`;
+});
+
+function addQuoteToTable(quote) {
+    const row = document.createElement("tr");
+    const tags = Array.isArray(quote.tags)
+        ? quote.tags.join(', ')
+        : quote.tags ?? '';
+
+    const values = [
+        quote.author,
+        quote.quote,
+        tags,
+        quote.createdAt
+    ];
+
+    for (const value of values) {
+        const cell = document.createElement("td");
+
+        cell.textContent = value ?? "";
+        row.appendChild(cell);
+    }
+
+    document.getElementById("rows").prepend(row);
+}
+
+const testButton = document.getElementById("test-quote-button");
+testButton.addEventListener("click", () => {
+    const testQuote = new Quote("test1", "test2", ["test3"]);
+    addQuoteToTable(testQuote);
+});
+
+
+async function loadQuotes() {
+    const quotes = await getQuotes();
+    quotes.forEach(quote => addQuoteToTable(quote));
+}
+
+
+loadQuotes();

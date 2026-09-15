@@ -1,12 +1,35 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Hello World!</title>
 
-  </head>
-  <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
-  </body>
+<form id="quote-form">
+    <label for="author">Quote:</label>
+    <input type="text" id="author" name="author"><br><br>
+
+    <label for="quote">Author:</label>
+    <input type="text" id="quote" name="quote"><br><br>
+
+    <label for="tags">Tags:</label>
+    <input type="text" id="tags" name="tags"><br><br>
+
+    <input type="submit" value="Submit">
+
+</form>
+<p id="quote-to-add"></p>
+
+<button id="test-quote-button" type="button">
+    Add Test Quote
+</button>
+
+<table id="quotes-table">
+    <tr>
+        <th>Author</th>
+        <th>Quote</th>
+        <th>Tags</th>
+        <th>Created At</th>
+    </tr>
+    <tbody id="rows">
+
+    </tbody>
+</table>
+<script src="renderer.js"></script>
 </html>

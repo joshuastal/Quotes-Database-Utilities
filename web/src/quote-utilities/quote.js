@@ -1,19 +1,18 @@
 export class Quote {
-    static id = "";
     static author = "";
     static quote = "";
     static tags = [];
+    static createdAt = "";
+    static updatedAt = "";
 
-    constructor(id, author, quote, tags, createdAt, updatedAt) {
-        this.id = id
+    constructor(author, quote, tags, createdAt, updatedAt) {
         this.author = author;
         this.quote = quote;
         this.tags = tags;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    get uuid() {
-        return this.id;
-    }
 
     get authorName() {
         return this.author;
@@ -25,5 +24,17 @@ export class Quote {
 
     get quoteTags() {
         return this.tags;
+    }
+
+    get createdAtDate() {
+        return this.createdAt;
+    }
+
+    get updatedAtDate() {
+        return this.updatedAt;
+    }
+
+    tagsToString() {
+        return this.tags.join(', ');
     }
 }

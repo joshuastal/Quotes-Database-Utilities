@@ -35,10 +35,20 @@ export async function fetchQuotes() {
         const data = document.data();
 
         return new Quote(
-            document.id,
             data.Author,
             data.Quote,
             data.tags ?? [],
+            data.createdAt?.toDate().toISOString() ?? null,
+            data.updatedAt?.toDate().toISOString() ?? null
         );
     })
+}
+
+export async function addQuote(quote) {
+    console.log(`Quote added: ${quote.quote}`);
+    return quote
+}
+
+export async function deleteQuote(quote) {
+    // TODO
 }
