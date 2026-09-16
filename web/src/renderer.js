@@ -1,7 +1,8 @@
 import './index.css';
 import {Quote} from "./quote-utilities/quote.js";
-import {addQuote, getQuotes} from "./quote-utilities/quote-service.js";
+import {addQuote, getQuotes, sendQuotesToJSON} from "./quote-utilities/quote-service.js";
 
+let QUOTES = [];
 
 const quoteForm = document.getElementById('quote-form');
 const quoteToAdd = document.getElementById('quote-to-add');
@@ -17,6 +18,11 @@ quoteForm.addEventListener('submit', (event) => {
     addQuote(quote);
 
     quoteToAdd.textContent = `Quote submitted: ${author} ${quoteText} ${tags}`;
+});
+
+const exportButton = document.getElementById("export-to-json-button");
+exportButton.addEventListener("click", async () => {
+    await sendQuotesToJSON(QUOTES);
 });
 
 function addQuoteToTable(quote) {
@@ -50,8 +56,8 @@ testButton.addEventListener("click", () => {
 
 
 async function loadQuotes() {
-    const quotes = await getQuotes();
-    quotes.forEach(quote => addQuoteToTable(quote));
+    QUOTES = await getQuotes();
+    QUOTES.forEach(quote => addQuoteToTable(quote));
 }
 
 

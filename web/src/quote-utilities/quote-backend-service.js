@@ -1,14 +1,27 @@
 import difflib from 'difflib';
 import {writeFile} from 'node:fs/promises';
-
+import {dialog} from 'electron';
 
 export async function sendQuotesToJSON(quotes) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const fileName = `./quotes_${timestamp}.json`;
-    const fileURL = new URL(fileName, import.meta.url);
     const json = JSON.stringify(quotes, null, 2);
-    await writeFile(fileURL, json, 'utf8');
+
+    const {canceled, filePath} = await dialog.showSaveDialog({
+        title: 'Export quotes',
+        defaultPath: `quotes_${timestamp}.json`,
+        filters: [
+            {name: 'JSON files', extensions: ['json']}
+        ]
+    });
+
+    if (canceled || !filePath) {
+        return;
+    }
+
+    await writeFile(filePath, json, 'utf8');
+    return filePath;
 }
+
 
 export function findQuotesByField(quotes, field, value) {
     const search = String(value).trim().toLowerCase();
