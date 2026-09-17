@@ -1,15 +1,29 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <form id="quote-form">
     <label for="author">Author:</label>
-    <input type="text" id="author" name="author"><br><br>
+    <input type="text" id="author" name="author" placeholder="Unknown">
 
     <label for="quote">Quote:</label>
-    <textarea id="quote" name="quote" maxlength="547"></textarea>
+    <textarea
+            id="quote"
+            name="quote"
+            maxlength="547"
+            required
+            aria-describedby="quote-required"
+    ></textarea>
+    <small id="quote-required" class="required-message">Quote is required...</small>
 
     <label for="tags">Tags:</label>
-    <input type="text" id="tags" name="tags"><br><br>
+    <input
+            type="text"
+            id="tags"
+            name="tags"
+            required
+            aria-describedby="tags-required"
+    >
+    <small id="tags-required" class="required-message">Tags are required...</small>
 
     <input type="submit" value="Submit">
 
@@ -40,7 +54,14 @@
     </tbody>
 </table>
 
-<nav id="pagination" class="pagination" aria-label="Quotes pages"></nav>
+<div class=table-controls>
+    <nav id="pagination" class="pagination" aria-label="Quotes pages"></nav>
+
+    <button id="delete-quote-button" type="button">
+        Delete Quote
+    </button>
+</div>
+
 
 <script src="renderer.js"></script>
 </html>

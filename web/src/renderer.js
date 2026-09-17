@@ -10,7 +10,10 @@ const quoteForm = document.getElementById('quote-form');
 quoteForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
-    const author = document.getElementById('author').value;
+    let author = document.getElementById('author').value;
+    if (!author) {
+        author = "Unknown";
+    }
     const quoteText = document.getElementById('quote').value;
     const tags = document.getElementById('tags').value;
 
@@ -22,6 +25,18 @@ quoteForm.addEventListener('submit', (event) => {
     currentPage = 1;
     renderQuotesTable();
 });
+
+const submitButton = quoteForm.querySelector('input[type="submit"]');
+
+function updateSubmitButton() {
+    // Checks the entire form
+    // Returns false when validity is not met,
+    // Therefore, set disabled to true if not valid
+    submitButton.disabled = !quoteForm.checkValidity();
+}
+
+quoteForm.addEventListener('input', updateSubmitButton);
+updateSubmitButton();
 
 const exportButton = document.getElementById("export-to-json-button");
 exportButton.addEventListener("click", async () => {
@@ -124,6 +139,7 @@ async function loadQuotes() {
     try {
         QUOTES = await getQuotes();
         currentPage = 1;
+        console.log(QUOTES);
         renderQuotesTable();
     } finally {
         document.getElementById("loading-row")?.remove();
