@@ -2,11 +2,11 @@
 <html>
 
 <form id="quote-form">
-    <label for="author">Quote:</label>
+    <label for="author">Author:</label>
     <input type="text" id="author" name="author"><br><br>
 
-    <label for="quote">Author:</label>
-    <input type="text" id="quote" name="quote"><br><br>
+    <label for="quote">Quote:</label>
+    <textarea id="quote" name="quote" maxlength="547"></textarea>
 
     <label for="tags">Tags:</label>
     <input type="text" id="tags" name="tags"><br><br>
@@ -14,11 +14,7 @@
     <input type="submit" value="Submit">
 
 </form>
-<p id="quote-to-add"></p>
 
-<button id="test-quote-button" type="button">
-    Add Test Quote
-</button>
 
 <button id="export-to-json-button" type="button">
     Export Quotes to JSON
@@ -32,8 +28,19 @@
         <th>Created At</th>
     </tr>
     <tbody id="rows">
+    <tr id="loading-row">
+        <td colspan="4">
+            <div class="loading-status" role="status">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                Loading quotes…
+            </div>
+        </td>
+    </tr>
 
     </tbody>
 </table>
+
+<nav id="pagination" class="pagination" aria-label="Quotes pages"></nav>
+
 <script src="renderer.js"></script>
 </html>
