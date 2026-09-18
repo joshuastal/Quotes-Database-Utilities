@@ -1,11 +1,13 @@
 export class Quote {
+    static id = ""
     static author = "";
     static quote = "";
     static tags = [];
     static createdAt = "";
     static updatedAt = "";
 
-    constructor(author, quote, tags, createdAt, updatedAt) {
+    constructor(id, author, quote, tags, createdAt, updatedAt) {
+        this.id = id;
         this.author = author;
         this.quote = quote;
         this.tags = tags;
@@ -13,6 +15,10 @@ export class Quote {
         this.updatedAt = updatedAt;
     }
 
+
+    get quoteID() {
+        return this.id;
+    }
 
     get authorName() {
         return this.author;

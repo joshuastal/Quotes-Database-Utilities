@@ -35,6 +35,7 @@ export async function fetchQuotes() {
         const data = document.data();
 
         return new Quote(
+            document.id,
             data.Author,
             data.Quote,
             data.tags ?? [],
