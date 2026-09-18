@@ -6,24 +6,53 @@
     <input type="text" id="author" name="author" placeholder="Unknown">
 
     <label for="quote">Quote:</label>
-    <textarea
-            id="quote"
-            name="quote"
-            maxlength="547"
-            required
-            aria-describedby="quote-required"
-    ></textarea>
-    <small id="quote-required" class="required-message">Quote is required...</small>
+    <div class="quote-field">
+        <textarea
+                id="quote"
+                name="quote"
+                maxlength="547"
+                required
+                aria-describedby="quote-required"
+        ></textarea>
+        <small id="quote-required" class="required-message">Quote is required...</small>
+    </div>
 
-    <label for="tags">Tags:</label>
-    <input
-            type="text"
-            id="tags"
-            name="tags"
-            required
-            aria-describedby="tags-required"
-    >
-    <small id="tags-required" class="required-message">Tags are required...</small>
+    <label for="tag-search">Tags:</label>
+
+    <div class="tags-field">
+        <div id="tags-box" class="tags-box">
+            <div id="selected-tags" class="selected-tags"></div>
+
+            <input
+                    type="text"
+                    id="tag-search"
+                    class="tag-search"
+                    placeholder="Add"
+                    autocomplete="off"
+                    readonly
+                    aria-controls="tag-options"
+                    aria-expanded="false"
+            >
+        </div>
+
+        <div id="tag-options" class="tag-options" hidden>
+            <input
+                    type="search"
+                    id="tag-filter"
+                    class="tag-filter"
+                    placeholder="Search tags..."
+                    autocomplete="off"
+                    aria-controls="tag-option-list"
+            >
+            <div id="tag-option-list" class="tag-option-list"></div>
+        </div>
+
+        <input type="hidden" id="tags" name="tags">
+
+        <small id="tags-required" class="required-message">
+            Tags are required...
+        </small>
+    </div>
 
     <input type="submit" value="Submit">
 
