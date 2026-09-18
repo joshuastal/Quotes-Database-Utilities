@@ -45,7 +45,7 @@ export async function fetchQuotes() {
 }
 
 export async function addQuote(quote) {
-    console.log(`Quote added: ${quote.quote}`);
+    console.log(`Quote added: ${quote.quote}, ${quote.tagsToString()}`);
     return quote
 }
 
