@@ -1,89 +1,9 @@
-const MAX_TAGS = 3;
-
-const availableTags = [
-    "courage",
-    "goodness",
-    "illness",
-    "diligence",
-    "loneliness",
-    "virtues",
-    "laziness",
-    "almsgiving",
-    "family",
-    "patience",
-    "hospitality",
-    "idleness",
-    "death",
-    "temptation",
-    "gluttony",
-    "parenting",
-    "lust",
-    "repentance",
-    "persecution",
-    "doubt",
-    "suffering",
-    "rest",
-    "church_attendance",
-    "burnout",
-    "compassion",
-    "communion",
-    "discernment",
-    "despair",
-    "salvation",
-    "forgiveness",
-    "contentment",
-    "faith",
-    "distraction",
-    "community",
-    "truthfulness",
-    "greed",
-    "love",
-    "dryness",
-    "worship",
-    "perseverance",
-    "responsibility",
-    "listening",
-    "fear",
-    "pride",
-    "obedience",
-    "self_control",
-    "injustice",
-    "encouragement",
-    "sacrifice",
-    "failure",
-    "judgement",
-    "gossip",
-    "fasting",
-    "anger",
-    "silence",
-    "providence",
-    "wisdom",
-    "peace",
-    "shame",
-    "stewardship",
-    "solitude",
-    "work",
-    "long-suffering",
-    "friendship",
-    "service",
-    "prayer",
-    "grace",
-    "gratitude",
-    "hope",
-    "marriage",
-    "trust",
-    "theosis",
-    "integrity",
-    "mercy",
-    "children",
-    "confession",
-    "envy",
-    "joy",
-    "simplicity",
-    "humility",
-    "watchfulness",
-    "reading"
-];
+import {
+    AVAILABLE_TAGS,
+    MAX_TAGS,
+    matchesTagSearch,
+    sortTagsForSearch
+} from "../quote-utilities/tags.js";
 
 export function initTagSelector({onChange = () => {}} = {}) {
     const tagsField = document.querySelector(".tags-field");
@@ -96,40 +16,11 @@ export function initTagSelector({onChange = () => {}} = {}) {
     const tagsInput = document.getElementById("tags");
     const selectedTags = new Set();
 
-    function fuzzyMatches(tag, searchText) {
-        let tagIndex = 0;
-
-        for (const character of searchText) {
-            tagIndex = tag.indexOf(character, tagIndex);
-
-            if (tagIndex === -1) {
-                return false;
-            }
-
-            tagIndex += 1;
-        }
-
-        return true;
-    }
-
     function renderTagOptions() {
         const searchText = tagFilter.value.trim().toLowerCase();
-        const matchingTags = availableTags.filter((tag) => {
-            return selectedTags.size < MAX_TAGS && !selectedTags.has(tag) && fuzzyMatches(tag, searchText);
-        });
-
-        if (searchText) {
-            matchingTags.sort((firstTag, secondTag) => {
-                const firstIsSubstring = firstTag.includes(searchText);
-                const secondIsSubstring = secondTag.includes(searchText);
-
-                if (firstIsSubstring !== secondIsSubstring) {
-                    return firstIsSubstring ? -1 : 1;
-                }
-
-                return firstTag.localeCompare(secondTag);
-            });
-        }
+        const matchingTags = sortTagsForSearch(AVAILABLE_TAGS.filter((tag) => {
+            return selectedTags.size < MAX_TAGS && !selectedTags.has(tag) && matchesTagSearch(tag, searchText);
+        }), searchText);
 
         tagOptionList.replaceChildren();
 

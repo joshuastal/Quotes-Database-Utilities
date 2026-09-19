@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import {initializeApp} from "firebase/app";
 import {addDoc, collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, updateDoc} from 'firebase/firestore';
 import {Quote} from './quote.js'
+import {AVAILABLE_TAGS, MAX_TAGS} from './tags.js';
 
 dotenv.config({
     path: new URL('../.env', import.meta.url),
@@ -72,8 +73,30 @@ export async function updateQuote(id, field, value) {
         throw new Error('A quote ID is required.');
     }
 
+    if (field === 'tags') {
+        const tags = Array.isArray(value) ? [...value] : null;
+        const hasValidTags = tags
+            && tags.length >= 1
+            && tags.length <= MAX_TAGS
+            && new Set(tags).size === tags.length
+            && tags.every((tag) => {
+                return typeof tag === 'string' && tag.trim() !== '' && AVAILABLE_TAGS.includes(tag);
+            });
+
+        if (!hasValidTags) {
+            throw new Error('Tags must be an array of 1 to 3 unique catalog tags.');
+        }
+
+        await updateDoc(doc(db, 'Quotes', id), {
+            tags,
+            updatedAt: serverTimestamp(),
+        });
+
+        return {id, field, value: tags};
+    }
+
     if (field !== 'author' && field !== 'quote') {
-        throw new Error('Only Author and Quote can be updated.');
+        throw new Error('Only Author, Quote, and Tags can be updated.');
     }
 
     if (typeof value !== 'string') {

@@ -2,7 +2,7 @@ import './index.css';
 import {Quote} from "./quote-utilities/quote.js";
 import {addQuote, getQuotes, sendQuotesToJSON} from "./quote-utilities/quote-service.js";
 import {initTagSelector} from "./renderer/tag-selector.js";
-import {renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
+import {closeTagPopover, renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
 
 let QUOTES = [];
 const quoteForm = document.getElementById("quote-form");
@@ -65,6 +65,8 @@ exportButton.addEventListener("click", async () => {
 
 
 async function loadQuotes() {
+    closeTagPopover();
+
     try {
         QUOTES = await getQuotes();
         console.log(QUOTES);

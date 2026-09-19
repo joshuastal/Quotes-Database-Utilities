@@ -1,9 +1,11 @@
 import {deleteQuote, updateQuote} from "../quote-utilities/quote-service.js";
+import {initTagPopover} from "./tag-popover.js";
 
 const TABLE_PAGE_SIZE = 10;
 const rows = document.getElementById("rows");
 const pagination = document.getElementById("pagination");
 const deleteButton = document.getElementById("delete-quote-button");
+const tagPopover = initTagPopover();
 
 let quotes = [];
 let currentPage = 1;
@@ -205,21 +207,58 @@ function createAuthorCell(quote, row) {
     return cell;
 }
 
+function getTagsText(quote) {
+    return Array.isArray(quote.tags) ? quote.tags.join(", ") : quote.tags ?? "";
+}
+
+function createTagsCell(quote) {
+    const cell = document.createElement("td");
+    const text = document.createElement("span");
+
+    cell.className = "editable-tags-cell";
+    cell.tabIndex = 0;
+    cell.title = "Double-click or press Enter to edit tags";
+    cell.setAttribute("aria-haspopup", "dialog");
+    cell.setAttribute("aria-expanded", "false");
+    text.className = "table-cell-text";
+    text.textContent = getTagsText(quote);
+    cell.appendChild(text);
+
+    function openEditor() {
+        if (!hasDocumentId(quote)) {
+            window.alert("This quote cannot be edited because it has no Firestore ID.");
+            return;
+        }
+
+        tagPopover.open(cell, quote);
+    }
+
+    cell.addEventListener("dblclick", openEditor);
+    cell.addEventListener("keydown", (event) => {
+        if (event.target !== cell) {
+            return;
+        }
+
+        if (event.key === "Enter" || event.key === "F2") {
+            event.preventDefault();
+            openEditor();
+        }
+    });
+
+    return cell;
+}
+
 function addQuoteToTable(quote) {
     const row = document.createElement("tr");
-    const tags = Array.isArray(quote.tags)
-        ? quote.tags.join(', ')
-        : quote.tags ?? '';
 
     row.classList.toggle("is-selected", selectedQuoteIds.has(quote.id));
     row.appendChild(createAuthorCell(quote, row));
     row.appendChild(createEditableCell(quote, "quote"));
+    row.appendChild(createTagsCell(quote));
 
-    for (const value of [tags, quote.createdAt]) {
-        const cell = document.createElement("td");
-        cell.textContent = value ?? "";
-        row.appendChild(cell);
-    }
+    const createdAtCell = document.createElement("td");
+    createdAtCell.textContent = quote.createdAt ?? "";
+    row.appendChild(createdAtCell);
 
     rows.appendChild(row);
 }
@@ -282,6 +321,7 @@ function renderPagination() {
 }
 
 export function renderQuotesTable(nextQuotes = quotes, page = currentPage) {
+    tagPopover.close();
     quotes = nextQuotes;
     currentPage = Math.max(1, Math.min(page, getTotalPages()));
     rows.replaceChildren();
@@ -292,6 +332,10 @@ export function renderQuotesTable(nextQuotes = quotes, page = currentPage) {
     pageQuotes.forEach((quote) => addQuoteToTable(quote));
     renderPagination();
     updateDeleteButton();
+}
+
+export function closeTagPopover() {
+    tagPopover.close();
 }
 
 export function resetQuoteSelection() {
