@@ -336,6 +336,76 @@ button:hover:not(:disabled),
     background: #1e2527;
 }
 
+.author-cell-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.table-cell-text {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.editable-quote-cell {
+    cursor: text;
+}
+
+.editable-quote-cell:focus-visible {
+    outline: 0.15rem solid #4d7dff;
+    outline-offset: -0.2rem;
+}
+
+#quotes-table .inline-editor {
+    width: 100%;
+    min-width: 0;
+    height: 1.75rem;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.3rem;
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+}
+
+.quote-selection-checkbox:focus-visible {
+    outline: 0.15rem solid #4d7dff;
+    outline-offset: 0.1rem;
+}
+
+.quote-selection-checkbox {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    accent-color: var(--accent-hover);
+    opacity: 0;
+}
+
+#quotes-table tbody tr:hover .quote-selection-checkbox,
+#quotes-table tbody tr:focus-within .quote-selection-checkbox,
+.quote-selection-checkbox:focus-visible,
+.quote-selection-checkbox:checked {
+    opacity: 1;
+}
+
+#quotes-table tbody tr.is-selected,
+#quotes-table tbody tr.is-selected:hover,
+#quotes-table tbody tr.is-selected td {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+#quotes-table tbody tr.is-selected .inline-editor {
+    background: var(--field);
+    color: var(--text);
+}
+
 #quotes-table tr:last-child td {
     border-bottom: 0;
 }
@@ -430,6 +500,11 @@ button:hover:not(:disabled),
 #delete-quote-button {
     background: #ff1d0d;
     border-color: #ff1d0d;
+}
+
+#delete-quote-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* END TABLE CONTROLS SETTINGS */

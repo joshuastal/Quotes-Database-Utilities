@@ -24,6 +24,10 @@ export function addQuote(quote) {
     return window.quotes.addQuote(quote);
 }
 
+export function updateQuote(id, field, value) {
+    return window.quotes.updateQuote(id, field, value);
+}
+
 export async function sendQuotesToJSON(quotes) {
     return window.quotes.sendQuotesToJSON(quotes);
 }

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import {initializeApp} from "firebase/app";
-import {addDoc, collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, setDoc} from 'firebase/firestore';
+import {addDoc, collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, updateDoc} from 'firebase/firestore';
 import {Quote} from './quote.js'
 
 dotenv.config({
@@ -56,30 +56,48 @@ export async function fetchQuotes() {
 }
 
 export async function addQuote(quote) {
-
-    await addDoc(collection(db, 'Quotes'), {
+    const documentReference = await addDoc(collection(db, 'Quotes'), {
         Author: quote.author,
         Quote: quote.quote,
         tags: quote.tags,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-    }).then(() => {
-        console.log(`Quote successfully written! ${quote.author}: ${quote.quote} | Tags: [${quote.tags.join(", ")}]`);
-    }).catch((error) => {
-            console.error("Error writing document: ", error);
-        }
-    )
-    return quote;
+    });
+
+    return {...quote, id: documentReference.id};
 }
 
-export async function updateQuote(quote) {
-    await setDoc(doc(db, 'Quotes', quote.id), {
-        Author: quote.author,
-        Quote: quote.quote,
-        tags: quote.tags,
-        createdAt: quote.createdAt,
+export async function updateQuote(id, field, value) {
+    if (typeof id !== 'string' || !id.trim()) {
+        throw new Error('A quote ID is required.');
+    }
+
+    if (field !== 'author' && field !== 'quote') {
+        throw new Error('Only Author and Quote can be updated.');
+    }
+
+    if (typeof value !== 'string') {
+        throw new Error('The updated value must be text.');
+    }
+
+    const normalizedValue = field === 'author'
+        ? (value.trim() ? value : 'Unknown')
+        : value;
+
+    if (field === 'quote' && !value.trim()) {
+        throw new Error('Quote cannot be empty.');
+    }
+
+    if (field === 'quote' && value.length > 547) {
+        throw new Error('Quote cannot be longer than 547 characters.');
+    }
+
+    await updateDoc(doc(db, 'Quotes', id), {
+        [field === 'author' ? 'Author' : 'Quote']: normalizedValue,
         updatedAt: serverTimestamp(),
-    })
+    });
+
+    return {id, field, value: normalizedValue};
 }
 
 export async function deleteQuote(quote) {

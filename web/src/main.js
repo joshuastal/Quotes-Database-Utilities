@@ -1,11 +1,15 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('node:path');
-const {addQuote, deleteQuote, fetchQuotes} = require('./quote-utilities/firestore-service.js');
+const {addQuote, deleteQuote, fetchQuotes, updateQuote} = require('./quote-utilities/firestore-service.js');
 const {findDuplicates} = require('./quote-utilities/duplicate-finder.js');
 const {sendQuotesToJSON, findQuotesByField} = require('./quote-utilities/quote-backend-service.js');
 
 ipcMain.handle('quotes:add', (_event, quote) => {
     return addQuote(quote);
+});
+
+ipcMain.handle('quotes:update', (_event, id, field, value) => {
+    return updateQuote(id, field, value);
 });
 
 ipcMain.handle('quotes:delete', (_event, quote) => {

@@ -253,7 +253,6 @@ export function initTagSelector({onChange = () => {}} = {}) {
     });
 
     renderSelectedTags();
-    tagSearch.focus();
 
     return {
         getSelectedTags: () => [...selectedTags],

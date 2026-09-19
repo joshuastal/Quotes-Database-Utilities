@@ -2,21 +2,26 @@ import './index.css';
 import {Quote} from "./quote-utilities/quote.js";
 import {addQuote, getQuotes, sendQuotesToJSON} from "./quote-utilities/quote-service.js";
 import {initTagSelector} from "./renderer/tag-selector.js";
-import {renderQuotesTable} from "./renderer/quote-table.js";
+import {renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
 
 let QUOTES = [];
 const quoteForm = document.getElementById("quote-form");
 const submitButton = quoteForm.querySelector('input[type="submit"]');
+let isSavingQuote = false;
 
 function updateSubmitButton(tagsAreValid = tagSelector.hasSelection()) {
     // returns false if form is invalid, hence take the opposite to set disabled to True
-    submitButton.disabled = !quoteForm.checkValidity() || !tagsAreValid;
+    submitButton.disabled = isSavingQuote || !quoteForm.checkValidity() || !tagsAreValid;
 }
 
 const tagSelector = initTagSelector({onChange: updateSubmitButton});
 
-quoteForm.addEventListener("submit", (event) => {
+quoteForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+
+    if (isSavingQuote) {
+        return;
+    }
 
     if (!quoteForm.checkValidity() || !tagSelector.hasSelection()) {
         quoteForm.reportValidity();
@@ -34,9 +39,20 @@ quoteForm.addEventListener("submit", (event) => {
     const timestamp = new Date().toISOString();
     const quote = new Quote("", author, quoteText, tags, timestamp, timestamp);
 
-    addQuote(quote).catch(error => console.error("Error adding quote:", error));
-    QUOTES.unshift(quote);
-    renderQuotesTable(QUOTES, 1);
+    isSavingQuote = true;
+    updateSubmitButton();
+
+    try {
+        const savedQuote = await addQuote(quote);
+        QUOTES.unshift(savedQuote);
+        renderQuotesTable(QUOTES, 1);
+    } catch (error) {
+        console.error("Error adding quote:", error);
+        window.alert("Unable to save quote. Please try again.");
+    } finally {
+        isSavingQuote = false;
+        updateSubmitButton();
+    }
 });
 
 // watch for the input event and call updateSubmitButton() on each input event
@@ -52,6 +68,7 @@ async function loadQuotes() {
     try {
         QUOTES = await getQuotes();
         console.log(QUOTES);
+        resetQuoteSelection();
         renderQuotesTable(QUOTES, 1);
     } finally {
         document.getElementById("loading-row")?.remove();
