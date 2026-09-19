@@ -90,14 +90,16 @@ export function initTagPopover() {
         const focusedTag = document.activeElement?.matches?.(".tag-popover-option input")
             ? document.activeElement.dataset.tag
             : "";
-        const uncheckedTags = sortTagsForSearch(
-            AVAILABLE_TAGS.filter((tag) => !selectedTags.includes(tag) && matchesTagSearch(tag, searchText)),
+        const pinnedTags = active.originalTags.filter((tag) => selectedTags.includes(tag));
+        const scrollTop = optionList.scrollTop;
+        const unpinnedTags = sortTagsForSearch(
+            AVAILABLE_TAGS.filter((tag) => !pinnedTags.includes(tag) && matchesTagSearch(tag, searchText)),
             searchText
         );
 
         optionList.replaceChildren();
 
-        for (const tag of [...selectedTags, ...uncheckedTags]) {
+        for (const tag of [...pinnedTags, ...unpinnedTags]) {
             const option = document.createElement("label");
             const checkbox = document.createElement("input");
             const label = document.createElement("span");
@@ -136,12 +138,14 @@ export function initTagPopover() {
                 ?.focus();
         }
 
-        if (uncheckedTags.length === 0 && searchText.trim()) {
+        if (unpinnedTags.length === 0 && searchText.trim()) {
             const emptyState = document.createElement("div");
             emptyState.className = "tag-popover-empty";
             emptyState.textContent = "No matching tags";
             optionList.appendChild(emptyState);
         }
+
+        optionList.scrollTop = scrollTop;
     }
 
     function render() {

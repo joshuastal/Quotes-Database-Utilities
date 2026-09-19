@@ -485,6 +485,7 @@ button:hover:not(:disabled),
     padding: 0.4rem 0.55rem;
     border-radius: 0.3rem;
     color: var(--text);
+    text-transform: none;
     cursor: pointer;
 }
 
