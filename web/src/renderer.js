@@ -32,9 +32,9 @@ quoteForm.addEventListener("submit", (event) => {
     const quoteText = document.getElementById("quote").value;
     const tags = tagSelector.getSelectedTags();
     const timestamp = new Date().toISOString();
-    const quote = new Quote(author, quoteText, tags, timestamp, timestamp);
+    const quote = new Quote("", author, quoteText, tags, timestamp, timestamp);
 
-    addQuote(quote);
+    addQuote(quote).catch(error => console.error("Error adding quote:", error));
     QUOTES.unshift(quote);
     renderQuotesTable(QUOTES, 1);
 });
@@ -46,6 +46,7 @@ const exportButton = document.getElementById("export-to-json-button");
 exportButton.addEventListener("click", async () => {
     await sendQuotesToJSON(QUOTES);
 });
+
 
 async function loadQuotes() {
     try {
@@ -59,5 +60,7 @@ async function loadQuotes() {
 
 }
 
+const refreshQuotes = document.getElementById("refresh-quotes");
+refreshQuotes.addEventListener("click", loadQuotes);
 
 loadQuotes();

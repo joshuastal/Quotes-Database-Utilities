@@ -266,7 +266,8 @@ button, input[type='submit'] {
 }
 
 input[type='submit']:hover:not(:disabled),
-button:hover:not(:disabled) {
+button:hover:not(:disabled),
+#refresh-quotes:hover {
     background: var(--accent-hover);
 }
 
@@ -351,12 +352,24 @@ button:hover:not(:disabled) {
     margin-top: 0.75rem;
 }
 
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 0 0 auto;
+}
+
+.pagination-controls button {
+    margin-top: 0;
+}
+
 .pagination {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    width: 100%;
-    margin-top: 0.75rem;
+    width: auto;
+    margin-top: 0;
+    flex: 0 0 auto;
 }
 
 .pagination button {
@@ -370,7 +383,8 @@ button:hover:not(:disabled) {
     font-size: 0.75rem;
 }
 
-.pagination button:hover:not(:disabled) {
+.pagination button:hover:not(:disabled),
+#refresh-quotes:hover {
     border-color: var(--accent-hover);
     color: #ffffff;
 }
@@ -394,6 +408,28 @@ button:hover:not(:disabled) {
 #delete-quote-button {
     white-space: nowrap;
     flex-shrink: 0;
+}
+
+
+#refresh-quotes {
+    width: 1.75rem;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    line-height: 1;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.35rem;
+    background: transparent;
+    color: var(--muted);
+    font-size: 1rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+#delete-quote-button {
+    background: #ff1d0d;
+    border-color: #ff1d0d;
 }
 
 /* END TABLE CONTROLS SETTINGS */

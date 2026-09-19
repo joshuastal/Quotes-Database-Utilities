@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import {initializeApp} from "firebase/app";
-import {collection, getDocs, getFirestore} from 'firebase/firestore';
+import {addDoc, collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, setDoc} from 'firebase/firestore';
 import {Quote} from './quote.js'
 
 dotenv.config({
@@ -34,22 +34,54 @@ export async function fetchQuotes() {
     return snapshot.docs.map(document => {
         const data = document.data();
 
+        const toIso = value =>
+            typeof value?.toDate === "function"
+                ? value.toDate().toISOString()
+                : value ?? null;
+
         return new Quote(
             document.id,
             data.Author,
             data.Quote,
             data.tags ?? [],
-            data.createdAt?.toDate().toISOString() ?? null,
-            data.updatedAt?.toDate().toISOString() ?? null
+            toIso(data.createdAt),
+            toIso(data.updatedAt)
         );
-    })
+    }).sort((first, second) => {
+        if (!first.createdAt) return 1;
+        if (!second.createdAt) return -1;
+
+        return Date.parse(second.createdAt) - Date.parse(first.createdAt);
+    });
 }
 
 export async function addQuote(quote) {
-    console.log(`Quote added: ${quote.quote}, ${quote.tagsToString()}`);
-    return quote
+
+    await addDoc(collection(db, 'Quotes'), {
+        Author: quote.author,
+        Quote: quote.quote,
+        tags: quote.tags,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+    }).then(() => {
+        console.log(`Quote successfully written! ${quote.author}: ${quote.quote} | Tags: [${quote.tags.join(", ")}]`);
+    }).catch((error) => {
+            console.error("Error writing document: ", error);
+        }
+    )
+    return quote;
+}
+
+export async function updateQuote(quote) {
+    await setDoc(doc(db, 'Quotes', quote.id), {
+        Author: quote.author,
+        Quote: quote.quote,
+        tags: quote.tags,
+        createdAt: quote.createdAt,
+        updatedAt: serverTimestamp(),
+    })
 }
 
 export async function deleteQuote(quote) {
-    // TODO
+    await deleteDoc(doc(db, 'Quotes', quote.id));
 }

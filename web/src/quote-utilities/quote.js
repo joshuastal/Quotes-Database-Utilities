@@ -6,7 +6,7 @@ export class Quote {
     static createdAt = "";
     static updatedAt = "";
 
-    constructor(id, author, quote, tags, createdAt, updatedAt) {
+    constructor(id = "", author, quote, tags, createdAt, updatedAt) {
         this.id = id;
         this.author = author;
         this.quote = quote;
@@ -43,4 +43,5 @@ export class Quote {
     tagsToString() {
         return this.tags.join(', ');
     }
+    
 }

@@ -84,7 +84,18 @@
 </table>
 
 <div class=table-controls>
-    <nav id="pagination" class="pagination" aria-label="Quotes pages"></nav>
+    <div class="pagination-controls">
+        <nav id="pagination" class="pagination" aria-label="Quotes pages"></nav>
+
+        <button
+                id="refresh-quotes"
+                type="button"
+                aria-label="Refresh quotes"
+                title="Refresh quotes"
+        >
+            <span aria-hidden="true">↻</span>
+        </button>
+    </div>
 
     <button id="delete-quote-button" type="button">
         Delete Quote
