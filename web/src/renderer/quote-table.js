@@ -21,12 +21,7 @@ function getTotalPages() {
 }
 
 function updateDeleteButton() {
-    const selectedCount = selectedQuoteIds.size;
-
-    deleteButton.textContent = selectedCount
-        ? `Delete Selected (${selectedCount})`
-        : "Delete Selected";
-    deleteButton.disabled = isDeleting || selectedCount === 0;
+    deleteButton.disabled = isDeleting || selectedQuoteIds.size === 0;
 }
 
 function isSelectionCheckbox(target) {

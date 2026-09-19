@@ -626,10 +626,13 @@ button:hover:not(:disabled),
 }
 
 #delete-quote-button {
+    padding-top: calc(0.55rem - 1px);
+    padding-bottom: calc(0.55rem + 1px);
     white-space: nowrap;
     flex-shrink: 0;
+    background: #ff1d0d;
+    border-color: #ff1d0d;
 }
-
 
 #refresh-quotes {
     width: 1.75rem;
@@ -645,11 +648,6 @@ button:hover:not(:disabled),
     display: grid;
     place-items: center;
     flex-shrink: 0;
-}
-
-#delete-quote-button {
-    background: #ff1d0d;
-    border-color: #ff1d0d;
 }
 
 #delete-quote-button:disabled {
