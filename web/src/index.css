@@ -465,8 +465,8 @@ button:hover:not(:disabled),
 }
 
 .tag-popover-search:focus-visible {
-    outline: 0.15rem solid #4d7dff;
-    outline-offset: 0.1rem;
+    outline: none;
+    border-color: #4d7dff;
 }
 
 .tag-popover-option-list {
