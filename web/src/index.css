@@ -560,6 +560,107 @@ button:hover:not(:disabled),
 
 /* END TAG POPOVER SETTINGS */
 
+/* BEGIN OPERATION TOAST SETTINGS */
+#operation-toast {
+    position: fixed;
+    inset: auto;
+    bottom: 1.25rem;
+    left: 50%;
+    width: min(32rem, calc(100vw - 2rem));
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.5rem;
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.4);
+    transform: translate(-50%, 0.5rem);
+    opacity: 0;
+}
+
+#operation-toast:popover-open {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    animation: toast-enter 0.18s ease-out forwards;
+}
+
+#operation-toast.is-dismissing:popover-open {
+    animation: toast-exit 0.18s ease-in forwards;
+}
+
+#operation-toast.is-success {
+    border-color: #2f9e6b;
+}
+
+#operation-toast.is-error {
+    border-color: #ef4444;
+}
+
+.operation-toast-icon {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+#operation-toast.is-success .operation-toast-icon {
+    color: #55d68f;
+}
+
+#operation-toast.is-error .operation-toast-icon {
+    color: #ff7770;
+}
+
+.operation-toast-message {
+    min-width: 0;
+    font-size: 0.85rem;
+}
+
+@keyframes toast-enter {
+    from {
+        transform: translate(-50%, 0.5rem);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes toast-exit {
+    from {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translate(-50%, 0.5rem);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #operation-toast:popover-open {
+        animation: none;
+        transform: translateX(-50%);
+        opacity: 1;
+    }
+
+    #operation-toast.is-dismissing:popover-open {
+        animation: none;
+    }
+}
+
+/* END OPERATION TOAST SETTINGS */
+
 /* END TABLE SETTINGS */
 
 

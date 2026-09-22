@@ -3,6 +3,7 @@ import {Quote} from "./quote-utilities/quote.js";
 import {addQuote, getQuotes, sendQuotesToJSON} from "./quote-utilities/quote-service.js";
 import {initTagSelector} from "./renderer/tag-selector.js";
 import {closeTagPopover, renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
+import {showToast} from "./renderer/toast.js";
 
 let QUOTES = [];
 const quoteForm = document.getElementById("quote-form");
@@ -46,9 +47,10 @@ quoteForm.addEventListener("submit", async (event) => {
         const savedQuote = await addQuote(quote);
         QUOTES.unshift(savedQuote);
         renderQuotesTable(QUOTES, 1);
+        showToast("success", "Quote added.");
     } catch (error) {
         console.error("Error adding quote:", error);
-        window.alert("Unable to save quote. Please try again.");
+        showToast("error", "Quote could not be added. Try again.");
     } finally {
         isSavingQuote = false;
         updateSubmitButton();
@@ -72,6 +74,8 @@ async function loadQuotes() {
         console.log(QUOTES);
         resetQuoteSelection();
         renderQuotesTable(QUOTES, 1);
+    } catch (error) {
+        console.error("Error loading quotes:", error);
     } finally {
         document.getElementById("loading-row")?.remove();
         document.getElementById("quotes-table").removeAttribute("aria-busy");

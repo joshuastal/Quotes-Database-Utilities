@@ -5,6 +5,7 @@ import {
     sortTagsForSearch
 } from "../quote-utilities/tags.js";
 import {updateQuote} from "../quote-utilities/quote-service.js";
+import {showToast} from "./toast.js";
 
 const VIEWPORT_MARGIN = 8;
 const CELL_GAP = 4;
@@ -280,14 +281,16 @@ export function initTagPopover() {
             if (active === session) {
                 session.saving = false;
                 close({restoreFocus: true});
+                showToast("success", "Tags updated.");
             }
         } catch (error) {
             console.error("Error updating tags:", error);
 
             if (active === session) {
                 session.saving = false;
-                session.error = "Unable to save tags. Please try again.";
+                session.error = "";
                 render();
+                showToast("error", "Tags update failed. Changes were not saved.");
             }
         }
     }

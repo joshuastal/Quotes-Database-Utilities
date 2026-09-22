@@ -1,5 +1,6 @@
 import {deleteQuote, updateQuote} from "../quote-utilities/quote-service.js";
 import {initTagPopover} from "./tag-popover.js";
+import {showToast} from "./toast.js";
 
 const TABLE_PAGE_SIZE = 10;
 const rows = document.getElementById("rows");
@@ -104,13 +105,20 @@ function startInlineEdit(cell, quote, field) {
         input.disabled = true;
 
         try {
-            await updateQuote(quote.id, field, normalizedValue);
-            quote[field] = normalizedValue;
-            finish(normalizedValue);
+            const result = await updateQuote(quote.id, field, normalizedValue);
+            const savedValue = result?.value ?? normalizedValue;
+
+            quote[field] = savedValue;
+            finish(savedValue);
+            showToast("success", `${field === "author" ? "Author" : "Quote"} updated.`);
         } catch (error) {
             console.error(`Error updating ${field}:`, error);
+            quote[field] = originalValue;
             finish(originalValue);
-            window.alert("Unable to save the quote change. Please try again.");
+            showToast(
+                "error",
+                `${field === "author" ? "Author" : "Quote"} update failed. Changes were not saved.`
+            );
         }
     }
 
@@ -397,7 +405,12 @@ async function deleteSelectedQuotes() {
         renderQuotesTable(quotes, currentPage);
 
         if (failedCount > 0) {
-            window.alert(`${failedCount} selected quote${failedCount === 1 ? "" : "s"} could not be deleted.`);
+            showToast("error", `${deletedIds.size} deleted; ${failedCount} could not be deleted.`);
+        } else {
+            showToast(
+                "success",
+                `${deletedIds.size} quote${deletedIds.size === 1 ? "" : "s"} deleted.`
+            );
         }
     } finally {
         isDeleting = false;
