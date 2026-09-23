@@ -1,8 +1,8 @@
 {
-  "name": "web",
-  "productName": "web",
+  "name": "quotes-database-admin-panel",
+  "productName": "Quotes Database Admin Panel",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Purpose-built admin panel for managing quotes database.",
   "main": ".webpack/main",
   "private": true,
   "scripts": {
