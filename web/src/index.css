@@ -64,10 +64,13 @@ input[type='submit']:disabled {
     cursor: not-allowed;
 }
 
+
+#author,
 input[type='text'] {
     height: 2.5rem;
 }
 
+#author,
 input[type='text'],
 textarea {
     width: 100%;
@@ -79,6 +82,7 @@ textarea {
     font: inherit;
 }
 
+#author:focus-visible,
 input[type='text']:focus-visible,
 textarea:focus-visible {
     outline: none;
