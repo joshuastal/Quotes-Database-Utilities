@@ -668,7 +668,7 @@ button:hover:not(:disabled),
 .table-controls {
     display: grid;
     align-items: center;
-    grid-template-columns: minmax(0, 1fr) minmax(12rem, 24rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 36rem) minmax(0, 1fr);
     gap: 0.75rem;
     margin-top: 0.75rem;
 }
