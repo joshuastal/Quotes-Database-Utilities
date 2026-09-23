@@ -97,15 +97,68 @@
         </button>
     </div>
 
-    <input
-            id="quote-search"
-            class="quote-search"
-            type="search"
-            placeholder="Search quotes..."
-            autocomplete="off"
-            aria-label="Search quotes"
-            aria-controls="rows"
+    <div class="quote-search-controls">
+        <input
+                id="quote-search"
+                class="quote-search"
+                type="search"
+                placeholder="Search quotes..."
+                autocomplete="off"
+                aria-label="Search quotes"
+                aria-controls="rows"
+        >
+
+        <button
+                id="quote-sort-button"
+                type="button"
+                aria-label="Sort quotes"
+                title="Sort quotes"
+                aria-controls="quote-sort-popover"
+                aria-expanded="false"
+                popovertarget="quote-sort-popover"
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5h16l-6.5 7.2v5.3l-3 1.5v-6.8z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div
+            id="quote-sort-popover"
+            popover="auto"
+            role="dialog"
+            aria-label="Sort quotes"
     >
+        <div id="quote-sort-fields" class="quote-sort-panel">
+            <div class="quote-sort-heading">Sort by</div>
+
+            <button type="button" class="quote-sort-field" data-sort-field="author">
+                <span class="quote-sort-field-icon" aria-hidden="true">A</span>
+                Author
+            </button>
+            <button type="button" class="quote-sort-field" data-sort-field="quote">
+                <span class="quote-sort-field-icon" aria-hidden="true">A</span>
+                Quote
+            </button>
+            <button type="button" class="quote-sort-field" data-sort-field="createdAt">
+                <svg class="quote-sort-field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 3v3M18 3v3M4 8h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1z"></path>
+                </svg>
+                Created At
+            </button>
+
+            <button id="clear-quote-sort" type="button" hidden>Clear sort</button>
+        </div>
+
+        <div id="quote-sort-options" class="quote-sort-panel" hidden>
+            <button id="quote-sort-back" type="button">
+                <span aria-hidden="true">&#8592;</span>
+                <span id="quote-sort-field-label"></span>
+            </button>
+            <button type="button" class="quote-sort-option" data-sort-direction="ascending"></button>
+            <button type="button" class="quote-sort-option" data-sort-direction="descending"></button>
+        </div>
+    </div>
 
     <button
             id="delete-quote-button"

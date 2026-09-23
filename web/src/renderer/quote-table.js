@@ -6,13 +6,31 @@ const TABLE_PAGE_SIZE = 10;
 const rows = document.getElementById("rows");
 const pagination = document.getElementById("pagination");
 const quoteSearch = document.getElementById("quote-search");
+const sortButton = document.getElementById("quote-sort-button");
+const sortPopover = document.getElementById("quote-sort-popover");
+const sortFields = document.getElementById("quote-sort-fields");
+const sortOptions = document.getElementById("quote-sort-options");
+const sortFieldLabel = document.getElementById("quote-sort-field-label");
+const sortFieldButtons = [...document.querySelectorAll(".quote-sort-field")];
+const sortOptionButtons = [...document.querySelectorAll(".quote-sort-option")];
+const sortBackButton = document.getElementById("quote-sort-back");
+const clearSortButton = document.getElementById("clear-quote-sort");
 const deleteButton = document.getElementById("delete-quote-button");
 const tagPopover = initTagPopover();
 
 let quotes = [];
 let currentPage = 1;
 let isDeleting = false;
+let activeSort = null;
+let selectedSortField = null;
 const selectedQuoteIds = new Set();
+
+const SORT_FIELDS = {
+    author: {label: "Author", ascending: "A–Z", descending: "Z–A"},
+    quote: {label: "Quote", ascending: "A–Z", descending: "Z–A"},
+    createdAt: {label: "Created At", ascending: "Oldest", descending: "Newest"},
+};
+const textCollator = new Intl.Collator(undefined, {sensitivity: "base"});
 
 function hasDocumentId(quote) {
     return typeof quote.id === "string" && quote.id.trim() !== "";
@@ -34,6 +52,35 @@ function getFilteredQuotes() {
 
     return quotes.filter((quote) => normalizeSearchText(quote.author).includes(query)
         || normalizeSearchText(quote.quote).includes(query));
+}
+
+function getSortedQuotes(filteredQuotes) {
+    if (!activeSort) {
+        return filteredQuotes;
+    }
+
+    const {field, direction} = activeSort;
+
+    return [...filteredQuotes].sort((first, second) => {
+        const firstValue = field === "createdAt"
+            ? Date.parse(first[field])
+            : String(first[field] ?? "").trim();
+        const secondValue = field === "createdAt"
+            ? Date.parse(second[field])
+            : String(second[field] ?? "").trim();
+        const firstMissing = field === "createdAt" ? Number.isNaN(firstValue) : !firstValue;
+        const secondMissing = field === "createdAt" ? Number.isNaN(secondValue) : !secondValue;
+
+        if (firstMissing || secondMissing) {
+            return firstMissing === secondMissing ? 0 : firstMissing ? 1 : -1;
+        }
+
+        const comparison = field === "createdAt"
+            ? firstValue - secondValue
+            : textCollator.compare(firstValue, secondValue);
+
+        return direction === "ascending" ? comparison : -comparison;
+    });
 }
 
 function getTotalPages(filteredQuotes = getFilteredQuotes()) {
@@ -357,7 +404,7 @@ function renderPagination(filteredQuotes) {
 export function renderQuotesTable(nextQuotes = quotes, page = currentPage) {
     tagPopover.close();
     quotes = nextQuotes;
-    const filteredQuotes = getFilteredQuotes();
+    const filteredQuotes = getSortedQuotes(getFilteredQuotes());
 
     currentPage = Math.max(1, Math.min(page, getTotalPages(filteredQuotes)));
     rows.replaceChildren();
@@ -465,4 +512,109 @@ quoteSearch.addEventListener("input", () => {
     renderQuotesTable();
 });
 
+function updateSortControl() {
+    const option = activeSort ? SORT_FIELDS[activeSort.field][activeSort.direction] : "";
+    const description = activeSort ? `${SORT_FIELDS[activeSort.field].label}, ${option}` : "";
+
+    sortButton.classList.toggle("is-active", Boolean(activeSort));
+    sortButton.setAttribute("aria-label", description ? `Sort quotes: ${description}` : "Sort quotes");
+    sortButton.title = description ? `Sort quotes: ${description}` : "Sort quotes";
+    clearSortButton.hidden = !activeSort;
+}
+
+function showSortFields({focus = false} = {}) {
+    selectedSortField = null;
+    sortOptions.hidden = true;
+    sortFields.hidden = false;
+    positionSortPopover();
+
+    if (focus) {
+        sortFieldButtons[0].focus();
+    }
+}
+
+function showSortOptions(field) {
+    const config = SORT_FIELDS[field];
+    const directions = field === "createdAt"
+        ? ["descending", "ascending"]
+        : ["ascending", "descending"];
+
+    selectedSortField = field;
+    sortFieldLabel.textContent = config.label;
+    sortOptionButtons.forEach((button, index) => {
+        button.dataset.sortDirection = directions[index];
+        button.textContent = config[button.dataset.sortDirection];
+        button.setAttribute(
+            "aria-pressed",
+            String(activeSort?.field === field && activeSort.direction === button.dataset.sortDirection)
+        );
+    });
+    sortFields.hidden = true;
+    sortOptions.hidden = false;
+    positionSortPopover();
+    sortOptionButtons[0].focus();
+}
+
+function positionSortPopover() {
+    if (!sortPopover.matches(":popover-open")) {
+        return;
+    }
+
+    const margin = 8;
+    const gap = 4;
+    const buttonRect = sortButton.getBoundingClientRect();
+    const popoverRect = sortPopover.getBoundingClientRect();
+    const left = Math.min(
+        Math.max(buttonRect.right - popoverRect.width, margin),
+        window.innerWidth - popoverRect.width - margin
+    );
+    const top = buttonRect.top - popoverRect.height - gap;
+
+    sortPopover.style.left = `${Math.round(left)}px`;
+    sortPopover.style.top = `${Math.round(Math.max(top, margin))}px`;
+}
+
+sortFieldButtons.forEach((button) => {
+    button.addEventListener("click", () => showSortOptions(button.dataset.sortField));
+});
+
+sortOptionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        activeSort = {field: selectedSortField, direction: button.dataset.sortDirection};
+        currentPage = 1;
+        updateSortControl();
+        renderQuotesTable();
+        sortPopover.hidePopover();
+    });
+});
+
+sortBackButton.addEventListener("click", () => showSortFields({focus: true}));
+clearSortButton.addEventListener("click", () => {
+    activeSort = null;
+    currentPage = 1;
+    updateSortControl();
+    renderQuotesTable();
+    sortPopover.hidePopover();
+});
+
+sortPopover.addEventListener("toggle", (event) => {
+    const isOpen = event.newState === "open";
+
+    sortButton.setAttribute("aria-expanded", String(isOpen));
+
+    if (isOpen) {
+        showSortFields();
+        sortFieldButtons[0].focus();
+    } else if (sortPopover.contains(document.activeElement)) {
+        sortButton.focus({preventScroll: true});
+    }
+});
+
+window.addEventListener("resize", () => {
+    if (sortPopover.matches(":popover-open")) {
+        sortPopover.hidePopover();
+    }
+});
+
+updateSortControl();
 updateDeleteButton();
