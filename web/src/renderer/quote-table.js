@@ -5,6 +5,7 @@ import {showToast} from "./toast.js";
 const TABLE_PAGE_SIZE = 10;
 const rows = document.getElementById("rows");
 const pagination = document.getElementById("pagination");
+const quoteSearch = document.getElementById("quote-search");
 const deleteButton = document.getElementById("delete-quote-button");
 const tagPopover = initTagPopover();
 
@@ -17,8 +18,26 @@ function hasDocumentId(quote) {
     return typeof quote.id === "string" && quote.id.trim() !== "";
 }
 
-function getTotalPages() {
-    return Math.max(1, Math.ceil(quotes.length / TABLE_PAGE_SIZE));
+function normalizeSearchText(value) {
+    return String(value ?? "")
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, " ")
+        .trim();
+}
+
+function getFilteredQuotes() {
+    const query = normalizeSearchText(quoteSearch.value);
+
+    if (!query) {
+        return quotes;
+    }
+
+    return quotes.filter((quote) => normalizeSearchText(quote.author).includes(query)
+        || normalizeSearchText(quote.quote).includes(query));
+}
+
+function getTotalPages(filteredQuotes = getFilteredQuotes()) {
+    return Math.max(1, Math.ceil(filteredQuotes.length / TABLE_PAGE_SIZE));
 }
 
 function updateDeleteButton() {
@@ -110,6 +129,7 @@ function startInlineEdit(cell, quote, field) {
 
             quote[field] = savedValue;
             finish(savedValue);
+            renderQuotesTable();
             showToast("success", `${field === "author" ? "Author" : "Quote"} updated.`);
         } catch (error) {
             console.error(`Error updating ${field}:`, error);
@@ -266,8 +286,19 @@ function addQuoteToTable(quote) {
     rows.appendChild(row);
 }
 
-function renderPagination() {
-    const totalPages = getTotalPages();
+function addEmptySearchRow() {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+
+    row.className = "empty-search-row";
+    cell.colSpan = 4;
+    cell.textContent = "No quotes match your search";
+    row.appendChild(cell);
+    rows.appendChild(row);
+}
+
+function renderPagination(filteredQuotes) {
+    const totalPages = getTotalPages(filteredQuotes);
 
     pagination.replaceChildren();
 
@@ -326,14 +357,21 @@ function renderPagination() {
 export function renderQuotesTable(nextQuotes = quotes, page = currentPage) {
     tagPopover.close();
     quotes = nextQuotes;
-    currentPage = Math.max(1, Math.min(page, getTotalPages()));
+    const filteredQuotes = getFilteredQuotes();
+
+    currentPage = Math.max(1, Math.min(page, getTotalPages(filteredQuotes)));
     rows.replaceChildren();
 
     const startIndex = (currentPage - 1) * TABLE_PAGE_SIZE;
-    const pageQuotes = quotes.slice(startIndex, startIndex + TABLE_PAGE_SIZE);
+    const pageQuotes = filteredQuotes.slice(startIndex, startIndex + TABLE_PAGE_SIZE);
 
-    pageQuotes.forEach((quote) => addQuoteToTable(quote));
-    renderPagination();
+    if (filteredQuotes.length === 0 && normalizeSearchText(quoteSearch.value)) {
+        addEmptySearchRow();
+    } else {
+        pageQuotes.forEach((quote) => addQuoteToTable(quote));
+    }
+
+    renderPagination(filteredQuotes);
     updateDeleteButton();
 }
 
@@ -420,6 +458,11 @@ async function deleteSelectedQuotes() {
 
 deleteButton.addEventListener("click", () => {
     void deleteSelectedQuotes();
+});
+
+quoteSearch.addEventListener("input", () => {
+    currentPage = 1;
+    renderQuotesTable();
 });
 
 updateDeleteButton();
