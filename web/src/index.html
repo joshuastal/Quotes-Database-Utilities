@@ -1,6 +1,18 @@
 <!doctype html>
 <html lang="en">
 
+<dialog
+        id="auth-dialog"
+        aria-labelledby="auth-dialog-title"
+        aria-describedby="auth-dialog-message"
+        tabindex="-1"
+>
+    <h1 id="auth-dialog-title">Checking sign-in…</h1>
+    <p id="auth-dialog-message">Restoring the saved Google session.</p>
+    <p id="auth-dialog-account" hidden></p>
+    <button id="auth-dialog-action" type="button" hidden></button>
+</dialog>
+
 <form id="quote-form">
     <label for="author">Author:</label>
     <input type="text" id="author" name="author" placeholder="Unknown">
@@ -170,7 +182,4 @@
         Delete
     </button>
 </div>
-
-
-<script src="renderer.js"></script>
 </html>

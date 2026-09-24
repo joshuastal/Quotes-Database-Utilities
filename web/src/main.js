@@ -1,35 +1,29 @@
-const {app, BrowserWindow, ipcMain} = require('electron');
-const path = require('node:path');
-const {addQuote, deleteQuote, fetchQuotes, updateQuote} = require('./quote-utilities/firestore-service.js');
+const {app, BrowserWindow, ipcMain, shell} = require('electron');
 const {findDuplicates} = require('./quote-utilities/duplicate-finder.js');
-const {sendQuotesToJSON, findQuotesByField} = require('./quote-utilities/quote-backend-service.js');
+const {sendQuotesToJSON} = require('./quote-utilities/quote-backend-service.js');
+const {createGoogleOAuth} = require('./auth/google-oauth.js');
 
-ipcMain.handle('quotes:add', (_event, quote) => {
-    return addQuote(quote);
-});
-
-ipcMain.handle('quotes:update', (_event, id, field, value) => {
-    return updateQuote(id, field, value);
-});
-
-ipcMain.handle('quotes:delete', (_event, quote) => {
-    return deleteQuote(quote);
-});
-
-ipcMain.handle('quotes:fetch', (_event) => {
-    return fetchQuotes();
+let mainWindow;
+const googleOAuth = createGoogleOAuth({
+    clientId: process.env.GOOGLE_OAUTH_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+    openExternal: (url) => shell.openExternal(url),
 });
 
 ipcMain.handle('quotes:send-to-json', (_event, quotes) => {
     return sendQuotesToJSON(quotes);
 });
 
-ipcMain.handle('quotes:find-by-field', (_event, quotes, field, value) => {
-    return findQuotesByField(quotes, field, value);
-});
-
 ipcMain.handle('quotes:find-duplicates', (_event, quotes) => {
     return findDuplicates(quotes);
+});
+
+ipcMain.handle('auth:google-sign-in', (event) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) {
+        throw new Error('Google sign-in is only available to the main renderer.');
+    }
+
+    return googleOAuth.beginGoogleSignIn();
 });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -39,7 +33,7 @@ if (require('electron-squirrel-startup')) {
 
 const createWindow = () => {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {

@@ -28,6 +28,50 @@ body {
     font-size: 0.875rem;
 }
 
+#auth-dialog {
+    width: min(28rem, calc(100vw - 2rem));
+    margin: auto;
+    padding: 1.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.65rem;
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.45);
+}
+
+#auth-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+}
+
+#auth-dialog:focus {
+    outline: none;
+}
+
+#auth-dialog h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+#auth-dialog p {
+    margin: 0.75rem 0 0;
+    line-height: 1.5;
+}
+
+#auth-dialog-account {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+#auth-dialog-action {
+    margin-top: 1.25rem;
+}
+
+#auth-dialog-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 form {
     display: grid;
     gap: 0.75rem;

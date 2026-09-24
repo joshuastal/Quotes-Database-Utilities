@@ -10,7 +10,10 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "test": "npm run test:node && npm run test:rules",
+    "test:node": "node --test test/google-oauth.test.js",
+    "test:rules": "firebase emulators:exec --project demo-quotes-owner-rules --only firestore \"node --test test/firestore-rules.test.js\""
   },
   "keywords": [],
   "author": {
@@ -28,9 +31,11 @@
     "@electron-forge/plugin-fuses": "^7.11.2",
     "@electron-forge/plugin-webpack": "^7.11.2",
     "@electron/fuses": "^1.8.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "css-loader": "^6.11.0",
     "electron": "44.3.0",
+    "firebase-tools": "^15.31.0",
     "node-loader": "^2.1.0",
     "style-loader": "^3.3.4"
   },

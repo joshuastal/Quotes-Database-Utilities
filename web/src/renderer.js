@@ -3,6 +3,7 @@ import {Quote} from "./quote-utilities/quote.js";
 import {addQuote, getQuotes, sendQuotesToJSON} from "./quote-utilities/quote-service.js";
 import {initTagSelector} from "./renderer/tag-selector.js";
 import {closeTagPopover, renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
+import {startAuthGate} from "./renderer/auth-gate.js";
 import {showToast} from "./renderer/toast.js";
 
 let QUOTES = [];
@@ -66,19 +67,28 @@ exportButton.addEventListener("click", async () => {
 });
 
 
+function finishQuoteLoading() {
+    document.getElementById("loading-row")?.remove();
+    document.getElementById("quotes-table").removeAttribute("aria-busy");
+}
+
+function renderLoadedQuotes(loadedQuotes) {
+    closeTagPopover();
+    QUOTES = loadedQuotes;
+    resetQuoteSelection();
+    renderQuotesTable(QUOTES, 1);
+    finishQuoteLoading();
+}
+
 async function loadQuotes() {
     closeTagPopover();
 
     try {
-        QUOTES = await getQuotes();
-        console.log(QUOTES);
-        resetQuoteSelection();
-        renderQuotesTable(QUOTES, 1);
+        renderLoadedQuotes(await getQuotes());
     } catch (error) {
         console.error("Error loading quotes:", error);
     } finally {
-        document.getElementById("loading-row")?.remove();
-        document.getElementById("quotes-table").removeAttribute("aria-busy");
+        finishQuoteLoading();
     }
 
 }
@@ -86,4 +96,4 @@ async function loadQuotes() {
 const refreshQuotes = document.getElementById("refresh-quotes");
 refreshQuotes.addEventListener("click", loadQuotes);
 
-loadQuotes();
+startAuthGate({onAuthorized: renderLoadedQuotes});

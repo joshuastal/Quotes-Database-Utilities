@@ -1,8 +1,9 @@
-// This file is the file that the browser will use to communicate with the main process.
-// As such, it cannot import any node modules and must use the `window` object.
-// renderer.js will be calling this file
-
-// The window object is opened by the preload script in the preload.js file
+import {
+    addQuote as addFirestoreQuote,
+    deleteQuote as deleteFirestoreQuote,
+    fetchQuotes,
+    updateQuote as updateFirestoreQuote,
+} from './firestore-service.js';
 
 function ensureOnline() {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
@@ -11,31 +12,27 @@ function ensureOnline() {
 }
 
 export async function getDuplicates(quotes) {
-    return window.duplicates.findDuplicates(quotes);
+    return window.quotes.findDuplicates(quotes);
 }
 
-export async function getQuotes() {
+export function getQuotes() {
     ensureOnline();
-    return window.quotes.fetchQuotes();
-}
-
-export function findQuotesByField(quotes, field, value) {
-    return window.quotes.findQuotesByField(quotes, field, value);
+    return fetchQuotes();
 }
 
 export function deleteQuote(quote) {
     ensureOnline();
-    return window.quotes.deleteQuote(quote);
+    return deleteFirestoreQuote(quote);
 }
 
 export function addQuote(quote) {
     ensureOnline();
-    return window.quotes.addQuote(quote);
+    return addFirestoreQuote(quote);
 }
 
 export function updateQuote(id, field, value) {
     ensureOnline();
-    return window.quotes.updateQuote(id, field, value);
+    return updateFirestoreQuote(id, field, value);
 }
 
 export async function sendQuotesToJSON(quotes) {
