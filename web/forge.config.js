@@ -2,7 +2,7 @@ const {FusesPlugin} = require('@electron-forge/plugin-fuses');
 const {FuseV1Options, FuseVersion} = require('@electron/fuses');
 const path = require('node:path');
 
-const appIcon = path.resolve(__dirname, 'assets/app-icons');
+const appIcon = path.resolve(__dirname, 'assets/app-icon');
 const linuxAppIcon = `${appIcon}.png`;
 
 module.exports = {
