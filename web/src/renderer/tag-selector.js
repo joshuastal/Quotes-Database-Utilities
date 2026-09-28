@@ -101,6 +101,23 @@ export function initTagSelector({onChange = () => {}} = {}) {
         tagSearch.setAttribute("aria-expanded", "false");
     }
 
+    function focusTagOption(option, direction) {
+        option.focus({preventScroll: true});
+
+        const listRect = tagOptionList.getBoundingClientRect();
+        const optionRect = option.getBoundingClientRect();
+
+        if (optionRect.top < listRect.top) {
+            tagOptionList.scrollTop = direction > 0
+                ? 0
+                : tagOptionList.scrollTop + optionRect.top - listRect.top;
+        } else if (optionRect.bottom > listRect.bottom) {
+            tagOptionList.scrollTop = direction < 0
+                ? tagOptionList.scrollHeight - tagOptionList.clientHeight
+                : tagOptionList.scrollTop + optionRect.bottom - listRect.bottom;
+        }
+    }
+
     function moveTagOption(event, option, direction) {
         const options = getTagOptions();
 
@@ -114,7 +131,7 @@ export function initTagSelector({onChange = () => {}} = {}) {
             : (currentIndex + direction + options.length) % options.length;
 
         event.preventDefault();
-        options[nextIndex].focus();
+        focusTagOption(options[nextIndex], direction);
     }
 
     tagSearch.addEventListener("focus", () => {
