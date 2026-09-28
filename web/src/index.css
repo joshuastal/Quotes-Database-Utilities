@@ -197,30 +197,29 @@ input[type='submit']:focus-visible {
     left: 0;
     width: 100%;
     max-height: 28rem;
+    padding: 1.25rem;
     overflow: hidden;
     border: 1px solid var(--border-strong);
-    border-radius: 0.4rem;
-    background: var(--field);
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.25);
-}
-
-.tag-options:focus-within {
-    border-color: #4d7dff;
+    border-radius: 0.6rem;
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.4);
 }
 
 .tag-filter {
     width: 100%;
-    height: 2.5rem;
-    padding: 0.7rem 0.75rem;
-    border: 0;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0.4rem 0.4rem 0 0;
+    height: 2.25rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.4rem;
     background: var(--field);
     color: var(--text);
+    font: inherit;
 }
 
 .tag-filter:focus-visible {
     outline: none;
+    border-color: #4d7dff;
 }
 
 .tag-filter::placeholder {
@@ -228,7 +227,10 @@ input[type='submit']:focus-visible {
 }
 
 .tag-option-list {
-    max-height: calc(28rem - 2.5rem);
+    display: grid;
+    gap: 0.25rem;
+    max-height: min(20rem, 40vh);
+    margin-top: 0.75rem;
     overflow-y: auto;
 }
 
@@ -236,22 +238,32 @@ input[type='submit']:focus-visible {
     display: block;
     width: 100%;
     margin: 0;
-    padding: 0.9rem 1.25rem;
+    min-height: 2.5rem;
+    padding: 0.6rem 0.75rem;
     border: 0;
-    border-radius: 0;
+    border-radius: 0.3rem;
     background: transparent;
     color: var(--text);
     text-align: left;
     font-size: 1rem;
+    text-transform: none;
+    cursor: pointer;
 }
 
-.tag-option:focus-visible {
+#tag-options .tag-option:hover:not(:disabled) {
     background: #292c2e;
 }
 
+#tag-options .tag-option:focus-visible {
+    outline: none;
+    background: var(--accent);
+    color: #ffffff;
+}
+
 .tag-empty {
-    padding: 0.9rem 1.25rem;
+    padding: 0.5rem 0.55rem;
     color: var(--muted);
+    font-size: 0.75rem;
 }
 
 .tag-pill {
