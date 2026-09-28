@@ -1,4 +1,3 @@
-/* BEGIN OPERATION TOAST SETTINGS */
 #operation-toast {
     position: fixed;
     inset: auto;
@@ -96,9 +95,4 @@
         animation: none;
     }
 }
-
-/* END OPERATION TOAST SETTINGS */
-
-/* END TABLE SETTINGS */
-
 

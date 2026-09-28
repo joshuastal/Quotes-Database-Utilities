@@ -1,4 +1,3 @@
-/* BEGIN TAG SELECTOR SETTINGS */
 .tags-field {
     position: relative;
 }
@@ -155,5 +154,3 @@
 .tags-field.is-invalid .required-message {
     display: block;
 }
-
-/* END TAG SELECTOR SETTINGS */

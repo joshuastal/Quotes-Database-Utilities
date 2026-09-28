@@ -1,4 +1,3 @@
-/* BEGIN TAG POPOVER SETTINGS */
 #tag-popover {
     position: fixed;
     inset: auto;
@@ -136,6 +135,3 @@
 #tag-popover[aria-busy="true"] {
     cursor: progress;
 }
-
-/* END TAG POPOVER SETTINGS */
-

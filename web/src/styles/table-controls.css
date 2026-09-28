@@ -1,4 +1,3 @@
-/* BEGIN TABLE CONTROLS SETTINGS */
 .table-controls {
     display: grid;
     align-items: center;
@@ -240,6 +239,4 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
-
-/* END TABLE CONTROLS SETTINGS */
 
