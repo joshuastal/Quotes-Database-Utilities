@@ -46,6 +46,8 @@ quoteForm.addEventListener("submit", async (event) => {
 
     try {
         const savedQuote = await addQuote(quote);
+        quoteForm.reset();
+        tagSelector.reset();
         QUOTES.unshift(savedQuote);
         renderQuotesTable(QUOTES, 1);
         showToast("success", "Quote added.");

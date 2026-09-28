@@ -15,6 +15,11 @@ export function initTagSelector({onChange = () => {}} = {}) {
     const tagOptionList = document.getElementById("tag-option-list");
     const tagsInput = document.getElementById("tags");
     const selectedTags = new Set();
+    let suppressTagSearchFocus = false;
+
+    function getTagOptions() {
+        return [...tagOptionList.querySelectorAll(".tag-option")];
+    }
 
     function renderTagOptions() {
         const searchText = tagFilter.value.trim().toLowerCase();
@@ -96,7 +101,28 @@ export function initTagSelector({onChange = () => {}} = {}) {
         tagSearch.setAttribute("aria-expanded", "false");
     }
 
+    function moveTagOption(event, option, direction) {
+        const options = getTagOptions();
+
+        if (options.length === 0) {
+            return;
+        }
+
+        const currentIndex = options.indexOf(option);
+        const nextIndex = currentIndex === -1
+            ? direction > 0 ? 0 : options.length - 1
+            : (currentIndex + direction + options.length) % options.length;
+
+        event.preventDefault();
+        options[nextIndex].focus();
+    }
+
     tagSearch.addEventListener("focus", () => {
+        if (suppressTagSearchFocus) {
+            suppressTagSearchFocus = false;
+            return;
+        }
+
         if (selectedTags.size >= MAX_TAGS) {
             return;
         }
@@ -105,16 +131,44 @@ export function initTagSelector({onChange = () => {}} = {}) {
         tagFilter.focus();
     });
 
-    tagsBox.addEventListener("click", () => {
+    tagSearch.addEventListener("pointerdown", () => {
+        suppressTagSearchFocus = true;
+    });
+
+    tagsBox.addEventListener("click", (event) => {
+        event.stopPropagation();
+        suppressTagSearchFocus = false;
+
         if (selectedTags.size >= MAX_TAGS) {
+            hideTagOptions();
             return;
         }
 
-        showTagOptions();
-        tagFilter.focus();
+        if (tagOptions.hidden) {
+            showTagOptions();
+            tagFilter.focus();
+        } else {
+            hideTagOptions();
+        }
     });
 
     tagFilter.addEventListener("input", showTagOptions);
+
+    tagFilter.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            moveTagOption(event, null, event.key === "ArrowDown" ? 1 : -1);
+        }
+    });
+
+    tagOptionList.addEventListener("keydown", (event) => {
+        const option = event.target.closest(".tag-option");
+
+        if (!option || (event.key !== "ArrowDown" && event.key !== "ArrowUp")) {
+            return;
+        }
+
+        moveTagOption(event, option, event.key === "ArrowDown" ? 1 : -1);
+    });
 
     tagOptions.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -138,15 +192,24 @@ export function initTagSelector({onChange = () => {}} = {}) {
     });
 
     document.addEventListener("click", (event) => {
-        if (!tagsField.contains(event.target)) {
+        if (!tagOptions.contains(event.target)) {
             hideTagOptions();
         }
     });
 
     renderSelectedTags();
 
+    function reset() {
+        selectedTags.clear();
+        tagFilter.value = "";
+        tagSearch.value = "";
+        renderSelectedTags();
+        hideTagOptions();
+    }
+
     return {
         getSelectedTags: () => [...selectedTags],
-        hasSelection: () => selectedTags.size > 0
+        hasSelection: () => selectedTags.size > 0,
+        reset
     };
 }
