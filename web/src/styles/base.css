@@ -1,0 +1,153 @@
+:root {
+    color-scheme: dark;
+    --background: #101314;
+    --surface: #171b1c;
+    --surface-raised: #1c2122;
+    --field: #121617;
+    --border: #252d30;
+    --border-strong: #303b3f;
+    --text: #b8bcba;
+    --muted: #7f8889;
+    --accent: #214fd0;
+    --accent-hover: #2e60e3;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+    margin: 0 auto;
+    max-width: 96rem;
+    min-height: 100vh;
+    padding: 1.25rem;
+    background: var(--background);
+    color: var(--text);
+    font-size: 0.875rem;
+}
+
+#auth-dialog {
+    width: min(28rem, calc(100vw - 2rem));
+    margin: auto;
+    padding: 1.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.65rem;
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.45);
+}
+
+#auth-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+}
+
+#auth-dialog:focus {
+    outline: none;
+}
+
+#auth-dialog h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+#auth-dialog p {
+    margin: 0.75rem 0 0;
+    line-height: 1.5;
+}
+
+#auth-dialog-account {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+#auth-dialog-action {
+    margin-top: 1.25rem;
+}
+
+#auth-dialog-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+form {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+}
+
+label {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.required-message {
+    color: #ef4444;
+    display: none;
+    font-size: 0.75rem;
+}
+
+#quote:invalid {
+    border-color: #ef4444;
+}
+
+#quote:invalid + .required-message {
+    display: block;
+}
+
+input[type='submit']:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+#author,
+input[type='text'] {
+    height: 2.5rem;
+}
+
+#author,
+input[type='text'],
+textarea {
+    width: 100%;
+    padding: 0.7rem 0.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.4rem;
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+}
+
+#author:focus-visible,
+input[type='text']:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    border-color: #4d7dff;
+}
+
+button:focus-visible,
+input[type='submit']:focus-visible {
+    outline: 0.15rem solid #4d7dff;
+    outline-offset: 0.1rem;
+    border-color: #4d7dff;
+}
+
+/* Quote Text Box */
+.quote-field {
+    display: flex;
+    flex-direction: column;
+}
+
+#quote {
+    height: 7.5rem;
+    resize: vertical;
+}
+

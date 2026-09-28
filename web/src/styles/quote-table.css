@@ -1,0 +1,143 @@
+/* BEGIN TABLE SETTINGS */
+#quotes-table {
+    width: 100%;
+    table-layout: fixed;
+    margin-top: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.6rem;
+    border-spacing: 0;
+    overflow: hidden;
+    background: var(--surface);
+}
+
+#quotes-table th,
+#quotes-table td {
+    padding: 0.8rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Fixed column widths */
+#quotes-table th:nth-child(1),
+#quotes-table td:nth-child(1) {
+    width: 20%;
+}
+
+#quotes-table th:nth-child(2),
+#quotes-table td:nth-child(2) {
+    width: 40%;
+}
+
+#quotes-table th:nth-child(3),
+#quotes-table td:nth-child(3) {
+    width: 25%;
+}
+
+#quotes-table th:nth-child(4),
+#quotes-table td:nth-child(4) {
+    width: 15%;
+}
+
+#quotes-table th {
+    background: var(--surface-raised);
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+#quotes-table tbody tr:nth-child(even) {
+    background: #191e1f;
+}
+
+#quotes-table tbody tr:hover {
+    background: #1e2527;
+}
+
+.author-cell-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.table-cell-text {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.editable-quote-cell {
+    cursor: text;
+}
+
+.editable-quote-cell:focus-visible {
+    outline: 0.15rem solid #4d7dff;
+    outline-offset: -0.2rem;
+}
+
+.editable-tags-cell {
+    cursor: pointer;
+}
+
+.editable-tags-cell:focus-visible {
+    outline: 0.15rem solid #4d7dff;
+    outline-offset: -0.2rem;
+}
+
+#quotes-table .inline-editor {
+    width: 100%;
+    min-width: 0;
+    height: 1.75rem;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.3rem;
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+}
+
+.quote-selection-checkbox:focus-visible {
+    outline: 0.15rem solid #4d7dff;
+    outline-offset: 0.1rem;
+}
+
+.quote-selection-checkbox {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    accent-color: var(--accent-hover);
+    opacity: 0;
+}
+
+#quotes-table tbody tr:hover .quote-selection-checkbox,
+#quotes-table tbody tr:focus-within .quote-selection-checkbox,
+.quote-selection-checkbox:focus-visible,
+.quote-selection-checkbox:checked {
+    opacity: 1;
+}
+
+#quotes-table tbody tr.is-selected,
+#quotes-table tbody tr.is-selected:hover,
+#quotes-table tbody tr.is-selected td {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+#quotes-table tbody tr.is-selected .inline-editor {
+    background: var(--field);
+    color: var(--text);
+}
+
+#quotes-table tr:last-child td {
+    border-bottom: 0;
+}
+

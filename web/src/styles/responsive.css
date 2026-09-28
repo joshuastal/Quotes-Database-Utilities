@@ -1,0 +1,23 @@
+@media (max-width: 48rem) {
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .quote-search-controls {
+        order: 3;
+        flex: 1 0 100%;
+    }
+}
+
+/* BEGIN LOADING SPINNER SETTINGS */
+@media (max-width: 30rem) {
+    body {
+        padding: 1rem;
+    }
+
+    form {
+        padding: 1rem;
+    }
+}

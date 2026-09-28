@@ -1,0 +1,26 @@
+
+button, input[type='submit'] {
+    width: fit-content;
+    margin-top: 0.25rem;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--accent);
+    border-radius: 0.4rem;
+    background: var(--accent);
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+input[type='submit']:hover:not(:disabled),
+button:hover:not(:disabled),
+#refresh-quotes:hover {
+    background: var(--accent-hover);
+}
+
+#export-to-json-button {
+    margin: 0.75rem 0 0;
+}
+
+
