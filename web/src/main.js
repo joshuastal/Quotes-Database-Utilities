@@ -1,5 +1,7 @@
+const path = require('node:path');
 const {app, BrowserWindow, ipcMain, shell} = require('electron');
-const {findDuplicates} = require('./quote-utilities/duplicate-finder.js');
+const {findDuplicates, findSimilar} = require('./quote-utilities/duplicate-finder.js');
+const {createExemptionStore} = require('./quote-utilities/exemption-store.js');
 const {sendQuotesToJSON} = require('./quote-utilities/quote-backend-service.js');
 const {createGoogleOAuth} = require('./auth/google-oauth.js');
 
@@ -17,6 +19,18 @@ ipcMain.handle('quotes:send-to-json', (_event, quotes) => {
 ipcMain.handle('quotes:find-duplicates', (_event, quotes) => {
     return findDuplicates(quotes);
 });
+
+ipcMain.handle('quotes:find-similar', (_event, text, quotes) => {
+    return findSimilar(text, quotes);
+});
+
+const exemptionStore = createExemptionStore(
+    path.join(app.getPath('userData'), 'duplicate-exemptions.json')
+);
+
+ipcMain.handle('duplicates:list-exemptions', () => exemptionStore.list());
+ipcMain.handle('duplicates:add-exemption', (_event, idA, idB) => exemptionStore.add(idA, idB));
+ipcMain.handle('duplicates:remove-exemption', (_event, key) => exemptionStore.remove(key));
 
 ipcMain.handle('auth:google-sign-in', (event) => {
     if (!mainWindow || event.sender !== mainWindow.webContents) {

@@ -188,7 +188,7 @@ function retryAccess(onAuthorized) {
 export function startAuthGate({onAuthorized}) {
     dialog.addEventListener("cancel", (event) => event.preventDefault());
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
+        if (event.key === "Escape" && dialog.open) {
             event.preventDefault();
             event.stopPropagation();
         }

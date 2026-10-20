@@ -1,10 +1,18 @@
 import './index.css';
 import {Quote} from "./quote-utilities/quote.js";
-import {addQuote, getQuotes, sendQuotesToJSON} from "./quote-utilities/quote-service.js";
+import {
+    addQuote,
+    findSimilarQuotes,
+    getDuplicates,
+    getQuotes,
+    listExemptions,
+    sendQuotesToJSON
+} from "./quote-utilities/quote-service.js";
 import {initTagSelector} from "./renderer/tag-selector.js";
 import {closeTagPopover, renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
 import {startAuthGate} from "./renderer/auth-gate.js";
 import {showToast} from "./renderer/toast.js";
+import {initDuplicateDialog} from "./renderer/duplicate-dialog.js";
 
 let QUOTES = [];
 const quoteForm = document.getElementById("quote-form");
@@ -17,6 +25,28 @@ function updateSubmitButton(tagsAreValid = tagSelector.hasSelection()) {
 }
 
 const tagSelector = initTagSelector({onChange: updateSubmitButton});
+const duplicateDialog = initDuplicateDialog();
+
+function getQuotesWithIds() {
+    return QUOTES.filter((quote) => typeof quote.id === "string" && quote.id);
+}
+
+async function confirmIfDuplicate(quote) {
+    let matches = [];
+
+    try {
+        matches = await findSimilarQuotes(quote.quote, getQuotesWithIds());
+    } catch (error) {
+        console.error("Error checking for similar quotes:", error);
+    }
+
+    const quotesById = new Map(QUOTES.map((existing) => [existing.id, existing]));
+    const liveMatches = matches
+        .map((match) => ({...match, quote: quotesById.get(match.id)}))
+        .filter((match) => match.quote);
+
+    return liveMatches.length === 0 || duplicateDialog.confirmNew(quote, liveMatches);
+}
 
 quoteForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -42,9 +72,13 @@ quoteForm.addEventListener("submit", async (event) => {
     const quote = new Quote("", author, quoteText, tags, timestamp, timestamp);
 
     isSavingQuote = true;
-    updateSubmitButton();
 
     try {
+        if (!(await confirmIfDuplicate(quote))) {
+            return;
+        }
+
+        updateSubmitButton();
         const savedQuote = await addQuote(quote);
         quoteForm.reset();
         tagSelector.reset();
@@ -68,6 +102,33 @@ exportButton.addEventListener("click", async () => {
     await sendQuotesToJSON(QUOTES);
 });
 
+const findDuplicatesButton = document.getElementById("find-duplicates-button");
+const findDuplicatesLabel = findDuplicatesButton.textContent.trim();
+findDuplicatesButton.addEventListener("click", async () => {
+    const spinner = document.createElement("span");
+    spinner.className = "loading-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+    findDuplicatesButton.disabled = true;
+    findDuplicatesButton.replaceChildren(spinner, "Scanning…");
+
+    let scan;
+    try {
+        const quotes = getQuotesWithIds();
+        const [pairs, exemptions] = await Promise.all([getDuplicates(quotes), listExemptions()]);
+        scan = {pairs, quotes, exemptions};
+    } catch (error) {
+        console.error("Error finding duplicates:", error);
+        showToast("error", "Duplicate scan failed. Try again.");
+    }
+
+    findDuplicatesButton.textContent = findDuplicatesLabel;
+    findDuplicatesButton.disabled = false;
+    findDuplicatesButton.focus();
+
+    if (scan) {
+        duplicateDialog.review(scan.pairs, scan.quotes, scan.exemptions);
+    }
+});
 
 function finishQuoteLoading() {
     document.getElementById("loading-row")?.remove();
@@ -80,6 +141,7 @@ function renderLoadedQuotes(loadedQuotes) {
     resetQuoteSelection();
     renderQuotesTable(QUOTES, 1);
     finishQuoteLoading();
+    findDuplicatesButton.disabled = false;
 }
 
 async function loadQuotes() {

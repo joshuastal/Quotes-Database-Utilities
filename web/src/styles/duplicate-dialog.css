@@ -1,0 +1,266 @@
+.table-toolbar .loading-spinner {
+    display: inline-block;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-right: 0.45rem;
+    vertical-align: -0.1rem;
+}
+
+#duplicate-dialog {
+    width: min(60rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.65rem;
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.45);
+}
+
+#duplicate-dialog[open] {
+    display: flex;
+    flex-direction: column;
+}
+
+#duplicate-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+}
+
+#duplicate-dialog[aria-busy="true"] {
+    cursor: progress;
+}
+
+#duplicate-dialog [hidden] {
+    display: none;
+}
+
+#duplicate-dialog button {
+    margin-top: 0;
+}
+
+#duplicate-dialog button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dup-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.dup-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
+.dup-subtitle,
+.dup-muted {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.dup-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#duplicate-dialog .dup-text-button,
+#duplicate-dialog .dup-close {
+    padding: 0.35rem 0.5rem;
+    border-color: transparent;
+    background: transparent;
+    color: var(--muted);
+}
+
+#duplicate-dialog .dup-text-button:hover:not(:disabled),
+#duplicate-dialog .dup-close:hover:not(:disabled) {
+    background: transparent;
+    color: #ffffff;
+}
+
+.dup-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+}
+
+.dup-similarity {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.dup-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.dup-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--surface);
+}
+
+.dup-card-label {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.dup-card-author {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.dup-card-text {
+    margin: 0;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.dup-diff {
+    border-radius: 2px;
+    background: rgba(77, 125, 255, 0.22);
+    color: #ffffff;
+}
+
+.dup-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.dup-tag {
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.45rem;
+    background: #202224;
+    color: var(--text);
+    font-size: 0.75rem;
+}
+
+.dup-card-date,
+.dup-card-merge {
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.dup-card-footer {
+    margin-top: auto;
+    padding-top: 0.25rem;
+}
+
+.dup-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.dup-footer-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.dup-merge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
+    cursor: pointer;
+}
+
+.dup-merge input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    accent-color: var(--accent-hover);
+}
+
+.dup-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.dup-empty strong {
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.dup-exempt-list {
+    display: grid;
+    gap: 0.15rem;
+    margin-top: 0.75rem;
+}
+
+.dup-exempt-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0.65rem;
+    border-radius: 0.3rem;
+}
+
+.dup-exempt-row:hover {
+    background: #292c2e;
+}
+
+.dup-exempt-text {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    line-height: 1.4;
+}
+
+.dup-exempt-quote strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.dup-exempt-row button {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 48rem) {
+    .dup-cards {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dup-header,
+    .dup-footer {
+        flex-wrap: wrap;
+    }
+}

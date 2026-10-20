@@ -11,8 +11,28 @@ function ensureOnline() {
     }
 }
 
+function toMatchInput(quotes) {
+    return quotes.map(({id, quote}) => ({id, quote}));
+}
+
 export async function getDuplicates(quotes) {
-    return window.quotes.findDuplicates(quotes);
+    return window.quotes.findDuplicates(toMatchInput(quotes));
+}
+
+export async function findSimilarQuotes(text, quotes) {
+    return window.quotes.findSimilar(text, toMatchInput(quotes));
+}
+
+export async function listExemptions() {
+    return window.quotes.listExemptions();
+}
+
+export async function addExemption(idA, idB) {
+    return window.quotes.addExemption(idA, idB);
+}
+
+export async function removeExemption(key) {
+    return window.quotes.removeExemption(key);
 }
 
 export function getQuotes() {

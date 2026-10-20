@@ -19,8 +19,19 @@ button:hover:not(:disabled),
     background: var(--accent-hover);
 }
 
-#export-to-json-button {
-    margin: 0.75rem 0 0;
+.table-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.table-toolbar button {
+    margin: 0;
+}
+
+.table-toolbar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 

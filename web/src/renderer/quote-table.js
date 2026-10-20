@@ -422,6 +422,19 @@ export function renderQuotesTable(nextQuotes = quotes, page = currentPage) {
     updateDeleteButton();
 }
 
+export function removeQuotesFromTable(ids) {
+    const removedIds = new Set(ids);
+
+    for (let index = quotes.length - 1; index >= 0; index -= 1) {
+        if (removedIds.has(quotes[index].id)) {
+            quotes.splice(index, 1);
+        }
+    }
+
+    removedIds.forEach((id) => selectedQuoteIds.delete(id));
+    renderQuotesTable();
+}
+
 export function closeTagPopover() {
     tagPopover.close();
 }

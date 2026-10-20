@@ -3,6 +3,7 @@
 @import './styles/buttons.css';
 @import './styles/quote-table.css';
 @import './styles/tag-popover.css';
+@import './styles/duplicate-dialog.css';
 @import './styles/operation-toast.css';
 @import './styles/table-controls.css';
 @import './styles/responsive.css';
