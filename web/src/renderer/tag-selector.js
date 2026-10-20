@@ -4,6 +4,13 @@ import {
     matchesTagSearch,
     sortTagsForSearch
 } from "../quote-utilities/tags.js";
+import {
+    createCreateRowContent,
+    createRemoveButton,
+    createTag,
+    getCreatableTag,
+    removeCatalogTag
+} from "./tag-catalog.js";
 
 export function initTagSelector({onChange = () => {}} = {}) {
     const tagsField = document.querySelector(".tags-field");
@@ -30,15 +37,27 @@ export function initTagSelector({onChange = () => {}} = {}) {
         tagOptionList.replaceChildren();
 
         for (const tag of matchingTags) {
+            const row = document.createElement("div");
             const option = document.createElement("button");
+            row.className = "tag-option-row";
             option.type = "button";
             option.className = "tag-option";
             option.dataset.tag = tag;
             option.textContent = tag;
-            tagOptionList.appendChild(option);
+            row.append(option, createRemoveButton(tag));
+            tagOptionList.appendChild(row);
         }
 
-        if (matchingTags.length === 0) {
+        const creatableTag = selectedTags.size < MAX_TAGS ? getCreatableTag(tagFilter.value) : "";
+
+        if (creatableTag) {
+            const createOption = document.createElement("button");
+            createOption.type = "button";
+            createOption.className = "tag-option tag-option-create";
+            createOption.dataset.create = creatableTag;
+            createOption.append(...createCreateRowContent(creatableTag));
+            tagOptionList.appendChild(createOption);
+        } else if (matchingTags.length === 0) {
             const emptyState = document.createElement("div");
             emptyState.className = "tag-empty";
             emptyState.textContent = "No matching tags";
@@ -174,6 +193,9 @@ export function initTagSelector({onChange = () => {}} = {}) {
     tagFilter.addEventListener("keydown", (event) => {
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             moveTagOption(event, null, event.key === "ArrowDown" ? 1 : -1);
+        } else if (event.key === "Enter") {
+            event.preventDefault();
+            getTagOptions()[0]?.click();
         }
     });
 
@@ -187,8 +209,19 @@ export function initTagSelector({onChange = () => {}} = {}) {
         moveTagOption(event, option, event.key === "ArrowDown" ? 1 : -1);
     });
 
-    tagOptions.addEventListener("click", (event) => {
+    tagOptions.addEventListener("click", async (event) => {
         event.stopPropagation();
+
+        const removeButton = event.target.closest(".tag-option-remove");
+
+        if (removeButton) {
+            if (await removeCatalogTag(removeButton.dataset.tag)) {
+                renderTagOptions();
+            }
+
+            tagFilter.focus();
+            return;
+        }
 
         const option = event.target.closest(".tag-option");
 
@@ -196,7 +229,13 @@ export function initTagSelector({onChange = () => {}} = {}) {
             return;
         }
 
-        selectedTags.add(option.dataset.tag);
+        const tag = option.dataset.create ? await createTag(option.dataset.create) : option.dataset.tag;
+
+        if (!tag) {
+            return;
+        }
+
+        selectedTags.add(tag);
         tagFilter.value = "";
         renderSelectedTags();
 

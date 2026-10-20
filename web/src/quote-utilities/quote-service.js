@@ -35,6 +35,18 @@ export async function removeExemption(key) {
     return window.quotes.removeExemption(key);
 }
 
+export async function listTags() {
+    return window.quotes.listTags();
+}
+
+export async function addTag(tag) {
+    return window.quotes.addTag(tag);
+}
+
+export async function removeTag(tag) {
+    return window.quotes.removeTag(tag);
+}
+
 export function getQuotes() {
     ensureOnline();
     return fetchQuotes();

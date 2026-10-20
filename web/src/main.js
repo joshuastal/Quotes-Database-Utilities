@@ -2,6 +2,8 @@ const path = require('node:path');
 const {app, BrowserWindow, ipcMain, shell} = require('electron');
 const {findDuplicates, findSimilar} = require('./quote-utilities/duplicate-finder.js');
 const {createExemptionStore} = require('./quote-utilities/exemption-store.js');
+const {createTagStore} = require('./quote-utilities/tag-store.js');
+const {AVAILABLE_TAGS} = require('./quote-utilities/tags.js');
 const {sendQuotesToJSON} = require('./quote-utilities/quote-backend-service.js');
 const {createGoogleOAuth} = require('./auth/google-oauth.js');
 
@@ -31,6 +33,15 @@ const exemptionStore = createExemptionStore(
 ipcMain.handle('duplicates:list-exemptions', () => exemptionStore.list());
 ipcMain.handle('duplicates:add-exemption', (_event, idA, idB) => exemptionStore.add(idA, idB));
 ipcMain.handle('duplicates:remove-exemption', (_event, key) => exemptionStore.remove(key));
+
+const tagStore = createTagStore(
+    path.join(app.getPath('userData'), 'tag-catalog.json'),
+    AVAILABLE_TAGS
+);
+
+ipcMain.handle('tags:list', () => tagStore.list());
+ipcMain.handle('tags:add', (_event, tag) => tagStore.add(tag));
+ipcMain.handle('tags:remove', (_event, tag) => tagStore.remove(tag));
 
 ipcMain.handle('auth:google-sign-in', (event) => {
     if (!mainWindow || event.sender !== mainWindow.webContents) {

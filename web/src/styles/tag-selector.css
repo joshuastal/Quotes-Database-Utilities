@@ -106,6 +106,46 @@
     color: #ffffff;
 }
 
+.tag-option-row {
+    position: relative;
+}
+
+.tag-option-row .tag-option {
+    padding-right: 2.75rem;
+}
+
+#tag-options .tag-option-row:hover .tag-option:not(:focus-visible) {
+    background: #292c2e;
+}
+
+.tag-option-remove {
+    opacity: 0;
+    cursor: pointer;
+}
+
+.tag-option-row .tag-option-remove {
+    position: absolute;
+    top: 50%;
+    right: 0.55rem;
+    transform: translateY(-50%);
+}
+
+.tag-option-row:hover .tag-option-remove,
+.tag-option-row:focus-within .tag-option-remove,
+.tag-popover-option:hover .tag-option-remove,
+.tag-popover-option:focus-within .tag-option-remove,
+.tag-option-remove:focus-visible {
+    opacity: 1;
+}
+
+.tag-create-prefix {
+    color: var(--muted);
+}
+
+#tag-options .tag-option-create:focus-visible .tag-create-prefix {
+    color: inherit;
+}
+
 .tag-empty {
     padding: 0.5rem 0.55rem;
     color: var(--muted);

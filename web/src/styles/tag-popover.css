@@ -77,6 +77,16 @@
     cursor: not-allowed;
 }
 
+.tag-popover-option .tag-option-remove {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.tag-popover-option span:not([class]) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .tag-popover-option input {
     flex: 0 0 auto;
     width: 1rem;

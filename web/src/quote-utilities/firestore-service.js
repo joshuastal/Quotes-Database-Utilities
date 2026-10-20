@@ -1,6 +1,6 @@
 import {addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc} from 'firebase/firestore';
 import {Quote} from './quote.js'
-import {AVAILABLE_TAGS, MAX_TAGS} from './tags.js';
+import {MAX_TAGS} from './tags.js';
 import {db} from './firebase-client.js';
 
 export async function fetchQuotes() {
@@ -53,12 +53,10 @@ export async function updateQuote(id, field, value) {
             && tags.length >= 1
             && tags.length <= MAX_TAGS
             && new Set(tags).size === tags.length
-            && tags.every((tag) => {
-                return typeof tag === 'string' && tag.trim() !== '' && AVAILABLE_TAGS.includes(tag);
-            });
+            && tags.every((tag) => typeof tag === 'string' && tag.trim() !== '');
 
         if (!hasValidTags) {
-            throw new Error('Tags must be an array of 1 to 3 unique catalog tags.');
+            throw new Error('Tags must be an array of 1 to 3 unique tags.');
         }
 
         await updateDoc(doc(db, 'Quotes', id), {

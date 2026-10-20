@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld('quotes', {
     listExemptions: () => ipcRenderer.invoke('duplicates:list-exemptions'),
     addExemption: (idA, idB) => ipcRenderer.invoke('duplicates:add-exemption', idA, idB),
     removeExemption: key => ipcRenderer.invoke('duplicates:remove-exemption', key),
+    listTags: () => ipcRenderer.invoke('tags:list'),
+    addTag: tag => ipcRenderer.invoke('tags:add', tag),
+    removeTag: tag => ipcRenderer.invoke('tags:remove', tag),
 });
 
 contextBridge.exposeInMainWorld('auth', {

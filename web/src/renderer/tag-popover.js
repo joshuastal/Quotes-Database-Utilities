@@ -6,6 +6,13 @@ import {
 } from "../quote-utilities/tags.js";
 import {updateQuote} from "../quote-utilities/quote-service.js";
 import {showToast} from "./toast.js";
+import {
+    createCreateRowContent,
+    createRemoveButton,
+    createTag,
+    getCreatableTag,
+    removeCatalogTag
+} from "./tag-catalog.js";
 
 const VIEWPORT_MARGIN = 8;
 const CELL_GAP = 4;
@@ -15,11 +22,11 @@ function areTagsEqual(firstTags, secondTags) {
         && firstTags.every((tag, index) => tag === secondTags[index]);
 }
 
-function areValidTags(tags) {
+function areValidTags(tags, originalTags) {
     return tags.length >= 1
         && tags.length <= MAX_TAGS
         && new Set(tags).size === tags.length
-        && tags.every((tag) => AVAILABLE_TAGS.includes(tag));
+        && tags.every((tag) => AVAILABLE_TAGS.includes(tag) || originalTags.includes(tag));
 }
 
 function getTagsText(quote) {
@@ -91,7 +98,9 @@ export function initTagPopover() {
         const focusedTag = document.activeElement?.matches?.(".tag-popover-option input")
             ? document.activeElement.dataset.tag
             : "";
-        const pinnedTags = active.originalTags.filter((tag) => selectedTags.includes(tag));
+        const pinnedTags = active.originalTags.filter((tag) => {
+            return selectedTags.includes(tag) || !AVAILABLE_TAGS.includes(tag);
+        });
         const scrollTop = optionList.scrollTop;
         const unpinnedTags = sortTagsForSearch(
             AVAILABLE_TAGS.filter((tag) => !pinnedTags.includes(tag) && matchesTagSearch(tag, searchText)),
@@ -130,7 +139,23 @@ export function initTagPopover() {
             });
 
             option.append(checkbox, label);
+
+            if (!isChecked && AVAILABLE_TAGS.includes(tag)) {
+                option.appendChild(createRemoveButton(tag));
+            }
+
             optionList.appendChild(option);
+        }
+
+        const creatableTag = getCreatableTag(searchText);
+
+        if (creatableTag) {
+            const createOption = document.createElement("label");
+            createOption.className = "tag-popover-option tag-popover-create";
+            createOption.classList.toggle("is-disabled", active.saving || selectedTags.length >= MAX_TAGS);
+            createOption.dataset.create = creatableTag;
+            createOption.append(...createCreateRowContent(creatableTag));
+            optionList.appendChild(createOption);
         }
 
         if (focusedTag) {
@@ -139,7 +164,7 @@ export function initTagPopover() {
                 ?.focus();
         }
 
-        if (unpinnedTags.length === 0 && searchText.trim()) {
+        if (unpinnedTags.length === 0 && searchText.trim() && !creatableTag) {
             const emptyState = document.createElement("div");
             emptyState.className = "tag-popover-empty";
             emptyState.textContent = "No matching tags";
@@ -154,7 +179,7 @@ export function initTagPopover() {
             return;
         }
 
-        const hasValidSelection = areValidTags(active.stagedTags);
+        const hasValidSelection = areValidTags(active.stagedTags, active.originalTags);
         const hasChanges = !areTagsEqual(active.stagedTags, active.originalTags);
 
         count.textContent = `${active.stagedTags.length} of ${MAX_TAGS} selected`;
@@ -256,7 +281,7 @@ export function initTagPopover() {
     async function save() {
         const session = active;
 
-        if (!session || session.saving || !areValidTags(session.stagedTags)
+        if (!session || session.saving || !areValidTags(session.stagedTags, session.originalTags)
             || areTagsEqual(session.stagedTags, session.originalTags)) {
             return;
         }
@@ -295,7 +320,79 @@ export function initTagPopover() {
         }
     }
 
+    async function stageNewTag(name) {
+        const session = active;
+
+        if (!session || session.saving || session.stagedTags.length >= MAX_TAGS) {
+            return;
+        }
+
+        const tag = await createTag(name);
+
+        if (!tag || active !== session) {
+            return;
+        }
+
+        if (!session.stagedTags.includes(tag) && session.stagedTags.length < MAX_TAGS) {
+            session.stagedTags.push(tag);
+        }
+
+        session.error = "";
+        search.value = "";
+        render();
+        search.focus();
+    }
+
     search.addEventListener("input", renderOptions);
+    search.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (!active || active.saving) {
+            return;
+        }
+
+        const checkbox = [...optionList.querySelectorAll("input")].find((input) => {
+            return !input.checked && !input.disabled && AVAILABLE_TAGS.includes(input.dataset.tag);
+        });
+        const createOption = optionList.querySelector(".tag-popover-create:not(.is-disabled)");
+
+        if (checkbox) {
+            search.value = "";
+            checkbox.click();
+            search.focus();
+        } else if (createOption) {
+            void stageNewTag(createOption.dataset.create);
+        }
+    });
+    optionList.addEventListener("click", async (event) => {
+        const removeButton = event.target.closest(".tag-option-remove");
+        const createOption = event.target.closest(".tag-popover-create");
+
+        if (!removeButton && !createOption) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!active || active.saving) {
+            return;
+        }
+
+        if (createOption) {
+            if (!createOption.classList.contains("is-disabled")) {
+                await stageNewTag(createOption.dataset.create);
+            }
+        } else if (await removeCatalogTag(removeButton.dataset.tag)) {
+            renderOptions();
+        }
+
+        search.focus();
+    });
     cancelButton.addEventListener("click", () => close({restoreFocus: true}));
     saveButton.addEventListener("click", () => void save());
     popover.addEventListener("keydown", (event) => {

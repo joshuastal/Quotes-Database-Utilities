@@ -120,3 +120,11 @@ export function sortTagsForSearch(tags, searchText) {
         return firstTag.localeCompare(secondTag);
     });
 }
+
+export function normalizeTag(text) {
+    return String(text ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^\p{L}\p{N}_-]/gu, "");
+}

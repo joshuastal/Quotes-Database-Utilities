@@ -9,6 +9,7 @@ import {
     sendQuotesToJSON
 } from "./quote-utilities/quote-service.js";
 import {initTagSelector} from "./renderer/tag-selector.js";
+import {loadTagCatalog} from "./renderer/tag-catalog.js";
 import {closeTagPopover, renderQuotesTable, resetQuoteSelection} from "./renderer/quote-table.js";
 import {startAuthGate} from "./renderer/auth-gate.js";
 import {showToast} from "./renderer/toast.js";
@@ -25,6 +26,7 @@ function updateSubmitButton(tagsAreValid = tagSelector.hasSelection()) {
 }
 
 const tagSelector = initTagSelector({onChange: updateSubmitButton});
+void loadTagCatalog();
 const duplicateDialog = initDuplicateDialog();
 
 function getQuotesWithIds() {
